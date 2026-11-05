@@ -1,8 +1,8 @@
 # VolvoConnect Volvo ID Migration - Technische Spezifikation
 
-**Version:** 1.0  
+**Version:** 1.1 - UPDATED MIT KORREKTEN ENDPOINTS  
 **Status:** 🟡 In Arbeit  
-**Last Updated:** 2026-11-05
+**Last Updated:** 2026-11-05 (Korrektionen nach API Analyse)
 
 ---
 
@@ -18,14 +18,22 @@ Client ID Format: dc-xxxxxxxx
 Deprecated: Nach Volvo-Ankündigung
 ```
 
-#### Neues System (Migration)
+#### Neues System (Migration) - KEYCLOAK BASIERT
 ```
-Discovery URL: https://login.volvoid.volvocars.com/.well-known/openid-configuration
-Issuer: https://login.volvoid.volvocars.com
+Discovery URL: https://auth.volvocars.com/realms/volvocars/.well-known/openid-configuration
+Issuer: https://auth.volvocars.com/realms/volvocars
 Client ID Format: vid-dc-xxxxxxxx
-Status: Produktiv ab [DATE]
-Required: PKCE Support
+Authorization Endpoint: https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/auth
+Token Endpoint: https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/token
+Userinfo Endpoint: https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/userinfo
+Revocation Endpoint: https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/revoke
+Logout Endpoint: https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/logout
+Status: Produktiv ab sofort
+Deadline alt: 31. Januar 2027
+Required: PKCE Support (S256)
 ```
+
+⚠️ **WICHTIG:** Discovery Endpoint dynamisch laden, nicht hart-codieren!
 
 ---
 
@@ -75,11 +83,11 @@ volvoIdIssuer: <URL>
 #### Logik
 ```
 if (getAttribute("volvoIdService") eq "new") {
-    use NEW discovery endpoint
+    use NEW discovery endpoint: auth.volvocars.com/realms/volvocars
     require PKCE
-    expect new token claims
+    expect new Keycloak token claims
 } else {
-    use OLD discovery endpoint
+    use OLD discovery endpoint: volvoid.eu.volvocars.com
     optional PKCE
     use legacy token claims
 }
@@ -99,10 +107,10 @@ if (getAttribute("volvoIdService") eq "new") {
 }
 ```
 
-#### Neue Claims (Keycloak)
+#### Neue Claims (Keycloak/auth.volvocars.com)
 ```json
 {
-  "iss": "https://login.volvoid.volvocars.com",
+  "iss": "https://auth.volvocars.com/realms/volvocars",
   "sub": "user-id",
   "aud": "client-id",
   "exp": 1234567890,
@@ -110,35 +118,69 @@ if (getAttribute("volvoIdService") eq "new") {
   "scope": "scope1 scope2",
   "client_id": "vid-dc-xxxxxxxx",
   "preferred_username": "username",
-  "acr": "urn:mace:incommon:iap:silver"
+  "acr": "urn:mace:incommon:iap:silver",
+  "name": "User Name",
+  "email": "user@example.com"
 }
 ```
 
 **Migration Hinweise:**
 - Neue Claims sind Superset der alten
+- Keycloak verwendet standardisierte Claims
 - Fallback auf `sub` für user identification
 - `scope` kann sich unterscheiden
+- Issuer ändert sich zu auth.volvocars.com/realms/volvocars
 
-### 4. VCC API Key Changes
+### 4. VCC API Endpoints (SEPARATE VON OAUTH!)
 
-**Alte Version:**
+**🔴 WICHTIG:** Die VCC API Endpoints bleiben GLEICH und ändern sich NICHT!
+
+#### VCC API Base URLs
 ```
-X-VCC-Authorization: Bearer <access_token>
-Accept: application/json
+Production: https://api.volvocars.com/v2/
+Region (China): https://api-cn.volvocars.com/v2/
 ```
 
-**Neue Version:**
+#### Häufig verwendete VCC Endpoints
+```
+GET https://api.volvocars.com/v2/vehicles
+   → Vehicle List abrufen
+
+GET https://api.volvocars.com/v2/vehicles/{vehicleId}
+   → Vehicle Details
+
+GET https://api.volvocars.com/v2/vehicles/{vehicleId}/status
+   → Vehicle Status/Readings
+
+GET https://api.volvocars.com/v2/vehicles/{vehicleId}/location
+   → Location Data
+
+GET https://api.volvocars.com/v2/vehicles/{vehicleId}/trips
+   → Trip History
+```
+
+#### Authorization Header (BLEIBT GLEICH!)
 ```
 Authorization: Bearer <access_token>
 Accept: application/json
 ```
 
-Oder:
-```
-X-VCC-API-Key: <new-format-api-key>
-```
+**WICHTIG:** Der Access Token stammt jetzt vom neuen Keycloak Service (`auth.volvocars.com`), aber das VCC API ändert sich NICHT!
 
-**Zu klären:** Exakte neue Format mit Volvo Developer Portal
+#### OAuth Endpoints (Separate von VCC API)
+```
+POST https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/token
+   → Token Exchange & Refresh
+
+POST https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/revoke
+   → Token Revocation / Logout
+
+GET https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/userinfo
+   → User Info abrufen
+
+GET https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/logout
+   → Logout Redirect
+```
 
 ### 5. Module Config Änderungen
 
@@ -198,7 +240,26 @@ sub test_discovery_parsing {
     assert_equal($old_discovery->{issuer}, 
                  "https://volvoid.eu.volvocars.com");
     assert_equal($new_discovery->{issuer}, 
-                 "https://login.volvoid.volvocars.com");
+                 "https://auth.volvocars.com/realms/volvocars");
+}
+```
+
+#### Test: VCC API Headers (UNVERÄNDERT)
+```perl
+sub test_vcc_api_headers {
+    # Die VCC API braucht weiterhin nur das Bearer Token
+    # Keine neuen API Keys erforderlich!
+    my $token = get_access_token("new");
+    my $response = request_vcc_api(
+        url => "https://api.volvocars.com/v2/vehicles",
+        headers => {
+            "Authorization" => "Bearer $token",
+            "Accept" => "application/json"
+        }
+    );
+    
+    assert($response->{success});
+    assert_array($response->{vehicles});
 }
 ```
 
@@ -208,41 +269,32 @@ sub test_discovery_parsing {
 ```
 1. User initiates login
 2. Module generates PKCE pair (code_verifier, code_challenge)
-3. Redirect to authorization endpoint with code_challenge
-4. User authenticates at Volvo ID
+3. Redirect to https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/auth
+4. User authenticates at Volvo ID (Keycloak)
 5. Callback with authorization_code
 6. Exchange code for token with code_verifier
-7. Parse JWT and extract claims
+7. Parse JWT and extract claims (Keycloak format)
 8. Store token and refresh token
-9. User can access vehicle data
+9. User can access vehicle data via api.volvocars.com
 ```
 
 #### Scenario 2: Token Refresh
 ```
 1. Module detects expired token
 2. Uses refresh_token to get new access_token
-3. Parse new JWT claims
-4. Update stored token
-5. Continue normal operation
+3. POST to https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/token
+4. Parse new JWT claims (Keycloak format)
+5. Update stored token
+6. Continue VCC API calls
 ```
 
-#### Scenario 3: Error Scenarios
+#### Scenario 3: VCC API Calls (UNVERÄNDERT)
 ```
-Scenario: Invalid Code Verifier
-- Expected: Token endpoint rejects request
-- Error handling: Clear error message in log
-
-Scenario: Discovery Endpoint Down
-- Expected: Fallback to cached endpoints or error
-- Error handling: Graceful degradation
-
-Scenario: Malformed JWT
-- Expected: Module detects and rejects
-- Error handling: Alert user, log details
-
-Scenario: Expired Refresh Token
-- Expected: Full re-authentication required
-- Error handling: Redirect to login
+1. Get vehicles: GET https://api.volvocars.com/v2/vehicles
+2. Get status: GET https://api.volvocars.com/v2/vehicles/{id}/status
+3. Get location: GET https://api.volvocars.com/v2/vehicles/{id}/location
+4. Header bleibt: Authorization: Bearer <token>
+5. Kein VCC API Key Wechsel erforderlich!
 ```
 
 ---
@@ -260,7 +312,7 @@ Scenario: Expired Refresh Token
 - Old service still works
 - Community support for migration
 
-### Phase 3: Old Service Deprecation (After Volvo Cutoff)
+### Phase 3: Old Service Deprecation (After Jan 31, 2027)
 - Old service endpoints stop working
 - Module logs warnings if old service is configured
 - Documentation updated
@@ -274,18 +326,25 @@ Scenario: Expired Refresh Token
 ## Implementation Checklist
 
 ### Code Changes
-- [ ] PKCE utility functions
-- [ ] Dual service endpoint selection
-- [ ] Discovery endpoint caching
-- [ ] Token claims parsing (both formats)
-- [ ] Error handling & logging
-- [ ] Attribute validation
+- [ ] **Discovery Endpoint URL korrigieren!**
+  - ✗ FALSCH: login.volvoid.volvocars.com
+  - ✓ RICHTIG: auth.volvocars.com/realms/volvocars
+  
+- [ ] **PKCE utility functions**
+- [ ] **Dual service endpoint selection**
+- [ ] **Discovery endpoint dynamisch laden** (nicht hart-codieren!)
+- [ ] **Token claims parsing (both formats)**
+- [ ] **Token Revocation Handling**
+- [ ] **Error handling & logging**
+- [ ] **Attribute validation**
 
 ### Tests
 - [ ] Unit tests for PKCE
 - [ ] Unit tests for endpoint parsing
+- [ ] Unit tests for VCC API (sollte unverändert sein)
 - [ ] Integration tests for auth flow
 - [ ] Integration tests for token refresh
+- [ ] Integration tests for VCC API
 - [ ] Error scenario tests
 
 ### Documentation
@@ -294,12 +353,6 @@ Scenario: Expired Refresh Token
 - [ ] Attribute documentation
 - [ ] Troubleshooting guide
 - [ ] Release notes
-
-### Community
-- [ ] Announcement
-- [ ] Beta testing period
-- [ ] Feedback collection
-- [ ] Final release
 
 ---
 
@@ -319,19 +372,8 @@ Scenario: Expired Refresh Token
 
 ### External Services
 - Volvo Developer Portal API
-- Volvo ID Service (old & new)
-
----
-
-## Risiken & Mitigations
-
-| Risiko | Likelihood | Impact | Mitigation |
-|--------|-----------|--------|-----------|
-| API Breaking Changes | Low | High | Regular testing, monitoring |
-| PKCE Implementation Issues | Low | Medium | RFC review, unit tests |
-| User Config Migration | Medium | Medium | Clear docs, auto-migration hints |
-| Performance Impact | Low | Low | Caching, profiling |
-| Security Issues | Low | High | Code review, security testing |
+- Keycloak @ auth.volvocars.com
+- VCC API @ api.volvocars.com
 
 ---
 
@@ -345,14 +387,16 @@ Scenario: Expired Refresh Token
 | Beta Release | 1 week | 2026-12-10 |
 | Final Release | 2 days | 2026-12-12 |
 
-**Deadline:** Before Volvo official cutoff (TBD)
+**Deadline:** Before Volvo official cutoff (31. Januar 2027)
 
 ---
 
 ## References
 
 - [Volvo ID Migration](https://developer.volvocars.com/news/volvoid-migration/)
+- [Keycloak OpenID Connect](https://www.keycloak.org/docs/latest/server_admin/)
 - [PKCE RFC 7636](https://tools.ietf.org/html/rfc7636)
 - [OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
 - [OpenID Connect](https://openid.net/connect/)
+- [Discovery Endpoint Response](https://auth.volvocars.com/realms/volvocars/.well-known/openid-configuration)
 
