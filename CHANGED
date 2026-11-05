@@ -2,6 +2,19 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-05 e4ef6e2 feat(VolvoConnect): Create new module for
+  Keycloak IAM migration
+  Copy 50_VolvoConnect.pm as 50_VolvoConnect_NEW.pm for parallel testing
+  Update OAuth endpoints to Keycloak-based service:
+  Authorization endpoint:
+    auth.volvocars.com/realms/volvocars/protocol/openid-connect/auth
+  Token endpoint:
+    auth.volvocars.com/realms/volvocars/protocol/openid-connect/token
+  PKCE support already in place (mandatory for new service)
+  Add Discovery Endpoint reference for dynamic loading
+  Module version: 2.0.0-keycloak-dev
+  Supports parallel operation with legacy 50_VolvoConnect.pm until 31 Jan 2027
+  Refs: #3
 - documentation: 2026-11-05 ef3c52d docs: Add practical action plan and
   detailed task breakdown for migration
   Added:
