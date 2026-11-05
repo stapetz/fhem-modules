@@ -2,6 +2,27 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-05 364e031 docs: Update VolvoConnect API endpoint
+  analysis with corrected Keycloak URLs
+  BREAKING: Corrected discovery endpoint
+  Was (WRONG): https://login.volvoid.volvocars.com
+  Is (CORRECT): https://auth.volvocars.com/realms/volvocars
+  Changes:
+  Add comprehensive API endpoint analysis document
+  Update technical specs with Keycloak endpoints
+  Clarify VCC API endpoints remain unchanged
+  List all OAuth endpoints from discovery
+  Add endpoint-specific implementation requirements
+  Discovery endpoints found:
+  Authorization: .../protocol/openid-connect/auth
+  Token: .../protocol/openid-connect/token
+  Userinfo: .../protocol/openid-connect/userinfo
+  Revocation: .../protocol/openid-connect/revoke
+  Logout: .../protocol/openid-connect/logout
+  VCC API unchanged:
+  Base URL: https://api.volvocars.com/v2/
+  Header: Authorization: Bearer <token>
+  No new API key format required
 - documentation: 2026-11-05 97c24d4 docs: Add VolvoConnect Volvo ID Migration
   project documentation
   Add workflow.md with 7 project phases and timeline
