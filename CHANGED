@@ -2,6 +2,29 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-05 ef3c52d docs: Add practical action plan and
+  detailed task breakdown for migration
+  Added:
+  volvo-id-migration-action-plan.md: Strategic approach for parallel
+    development
+  volvo-id-migration-detailed-tasks.md: Detailed task breakdown with effort
+    estimates
+  Strategy:
+  Phase 1A (Setup): New Developer App + Credentials
+  Phase 1B (Implementation): Code & first OAuth flow
+  Phase 1C (Testing): Daily testing with parallel devices
+  Phase 1D (Cutover): After 31.01.2027, transition to new module
+  Key Points:
+  Run old and new module in parallel for safe testing
+  Stefan creates new Volvo Developer Application now
+  Copilot implements Keycloak OAuth flow step-by-step
+  No service interruption during migration period
+  Clear cutover date after Volvo deadline
+  Timeline:
+  Week 1: Setup & Code Skeleton
+  Week 2-4: Full Implementation & Testing
+  Week 5-12: Stability & Enhancements
+  After 31.01.2027: Cutover to production
 - documentation: 2026-11-05 364e031 docs: Update VolvoConnect API endpoint
   analysis with corrected Keycloak URLs
   BREAKING: Corrected discovery endpoint
