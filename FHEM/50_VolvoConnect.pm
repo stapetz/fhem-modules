@@ -3,12 +3,26 @@ package main;
 use strict;
 use warnings;
 
-our $VolvoConnect_VERSION = '1.0.3-dev';
+our $VolvoConnect_VERSION = '1.1.0-dev';
 use utf8;
 use HttpUtils;
 use JSON;
 use MIME::Base64 qw(encode_base64 decode_base64);
 use Digest::SHA qw(sha256);
+
+# ============================================================================
+# Volvo ID OAuth 2.0 Service Support (Legacy + Keycloak)
+# ============================================================================
+# Support für beide OAuth Services:
+#  - Legacy (default): volvoid.eu.volvocars.com (bis 31. Jan 2027)
+#  - Keycloak (neu):   auth.volvocars.com/realms/volvocars
+#
+# Attribute keycloakService:
+#   0 = Legacy Volvo ID Service (default)
+#   1 = Neue Keycloak-basierte Volvo ID IAM
+#
+# Migration Stichtag: https://developer.volvocars.com/news/volvoid-migration/
+# ============================================================================
 
 # PKCE-Verifier used for OAuth 2.0 authorization code flow with PKCE
 my $GLOBAL_VERIFIER = "fhem_volvo_connect_secure_code_verifier_long_string_77_characters";
@@ -46,6 +60,32 @@ sub VolvoConnect_LoadEndpointFetchTimes($) {
     $times = {} if (ref($times) ne "HASH");
     $hash->{helper}{endpointFetchTimes} = $times;
     return $times;
+}
+
+# ============================================================================
+# OAuth 2.0 Endpoint Selection (Legacy vs Keycloak)
+# ============================================================================
+sub VolvoConnect_IsKeycloakService($) {
+    my ($hash) = @_;
+    return AttrVal($hash->{NAME}, "keycloakService", 0);
+}
+
+sub VolvoConnect_GetAuthorizationEndpoint($) {
+    my ($hash) = @_;
+    if (VolvoConnect_IsKeycloakService($hash)) {
+        return "https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/auth";
+    } else {
+        return "https://volvoid.eu.volvocars.com/as/authorization.oauth2";
+    }
+}
+
+sub VolvoConnect_GetTokenEndpoint($) {
+    my ($hash) = @_;
+    if (VolvoConnect_IsKeycloakService($hash)) {
+        return "https://auth.volvocars.com/realms/volvocars/protocol/openid-connect/token";
+    } else {
+        return "https://volvoid.eu.volvocars.com/as/token.oauth2";
+    }
 }
 
 sub VolvoConnect_MarkEndpointFetched($$) {
@@ -385,6 +425,7 @@ sub VolvoConnect_Initialize($) {
     $data{FWEXT}{"/VolvoConnect"}{FORKABLE} = 0;
 
     $hash->{AttrList} = "vin client_id client_secret vcc_api_key redirect_uri interval interval_slow interval_location "
+        . "keycloakService:0,1 "
         . "disable:0,1 disabledForIntervals "
         . "scope_capabilities:0-deaktiviert,1-aktiviert "
         . "scope_warnings:0-deaktiviert,1-aktiviert "
@@ -1865,8 +1906,9 @@ sub VolvoConnect_CheckAuthAndFetch($) {
         my $enc_scopes = urlEncode(join(" ", @scopes));
         my $enc_challenge    = urlEncode($code_challenge);
 
+        my $authEndpoint = VolvoConnect_GetAuthorizationEndpoint($hash);
         my $loginUrl =
-            "https://volvoid.eu.volvocars.com/as/authorization.oauth2"
+            $authEndpoint
             . "?response_type=code"
             . "&client_id=" . $enc_client_id
             . "&redirect_uri=" . $enc_redirect_uri
@@ -1895,7 +1937,7 @@ sub VolvoConnect_ExchangeCodeForToken($$) {
     my $basicAuth   = encode_base64($credentials, "");
     $basicAuth =~ s/\s+//g;
 
-    my $url = "https://volvoid.eu.volvocars.com/as/token.oauth2";
+    my $url = VolvoConnect_GetTokenEndpoint($hash);
 
     my $payload =
         "grant_type=authorization_code"
@@ -1928,7 +1970,7 @@ sub VolvoConnect_RefreshAccessToken($$) {
     my $basicAuth     = encode_base64($credentials, "");
     $basicAuth =~ s/\s+//g;
 
-    my $url = "https://volvoid.eu.volvocars.com/as/token.oauth2";
+    my $url = VolvoConnect_GetTokenEndpoint($hash);
 
     my $payload =
         "grant_type=refresh_token"
