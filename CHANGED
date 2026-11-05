@@ -2,6 +2,29 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-05 f755708 feat(VolvoConnect): Add dual OAuth 2.0 service
+  support via keycloakService attribute [VolvoConnect]
+  Add keycloakService attribute (0=Legacy, 1=Keycloak) to support both OAuth
+    services
+  Implement VolvoConnect_GetAuthorizationEndpoint() helper function
+  Implement VolvoConnect_GetTokenEndpoint() helper function
+  Implement VolvoConnect_IsKeycloakService() helper function
+  Update authorization URL logic to use helper function
+  Update token exchange logic to use helper function
+  Update token refresh logic to use helper function
+  Add keycloakService to AttrList for FHEM UI support
+  Version bump to 1.1.0-dev
+  Single module maintains backward compatibility while supporting new Keycloak
+    service
+  Supports parallel testing with two separate devices (legacy + keycloak)
+  Refs: #3
+- change: 2026-11-05 b9d59b1 refactor(VolvoConnect): Remove separate module,
+  use single file with keycloakService attribute
+  Remove 50_VolvoConnect_NEW.pm (duplicate code)
+  Will implement keycloakService attribute in 50_VolvoConnect.pm instead
+  Cleaner approach: one file to maintain, conditional logic for OAuth endpoints
+  Legacy code can be removed after 31 Jan 2027 when old Volvo ID service shuts
+    down
 - feature: 2026-11-05 e4ef6e2 feat(VolvoConnect): Create new module for
   Keycloak IAM migration
   Copy 50_VolvoConnect.pm as 50_VolvoConnect_NEW.pm for parallel testing

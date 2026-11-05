@@ -2,6 +2,22 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-05 f755708 feat(VolvoConnect): Add dual OAuth 2.0 service
+  support via keycloakService attribute
+  Add keycloakService attribute (0=Legacy, 1=Keycloak) to support both OAuth
+    services
+  Implement VolvoConnect_GetAuthorizationEndpoint() helper function
+  Implement VolvoConnect_GetTokenEndpoint() helper function
+  Implement VolvoConnect_IsKeycloakService() helper function
+  Update authorization URL logic to use helper function
+  Update token exchange logic to use helper function
+  Update token refresh logic to use helper function
+  Add keycloakService to AttrList for FHEM UI support
+  Version bump to 1.1.0-dev
+  Single module maintains backward compatibility while supporting new Keycloak
+    service
+  Supports parallel testing with two separate devices (legacy + keycloak)
+  Refs: #3
 - change: 2026-10-30 16db398 Entwicklung VolvoConnect 1.0.3-dev
 - bugfix: 2026-10-30 41d2646 fix(dashboards): remove sensor status dot and
   align Volvo indicator
