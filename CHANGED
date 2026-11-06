@@ -2,6 +2,12 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 08325bf fix: Correct dev update command to use
+  controls_volvo.txt
+  FHEM braucht eine controls-Datei (.txt), nicht die .pm-Datei direkt.
+  Korrekte Syntax:
+  update all
+    https://raw.githubusercontent.com/stapetz/fhem-modules/dev/controls_volvo.txt
 - documentation: 2026-11-06 b41eeb6 docs: Correct update command to use dev
   branch direct URL
   Nach Push auf dev: Nutze direkte Module-URL vom dev-Branch statt
