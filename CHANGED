@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 fbb3f61 fix(token-persistence): reload tokens after
+  keycloakService attribute change [VolvoConnect]
 - change: 2026-11-06 70c90ed debug: add CheckAuthAndFetch logging to trace
   token deletion [VolvoConnect]
 - change: 2026-11-06 2b769af debug: use file logging instead of Log3 for token
