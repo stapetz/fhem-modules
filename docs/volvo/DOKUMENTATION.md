@@ -1,6 +1,6 @@
 # VolvoConnect für FHEM: Installations- und Betriebsdokumentation
 
-Stand: 28.10.2026
+Stand: 04.11.2026
 
 ## Überblick
 
@@ -199,7 +199,18 @@ Die genaue Schreibweise der vom Modul erwarteten Aktivierungswerte sollte über 
 3. Nach der Weiterleitung nur den Wert des URL-Parameters `code` kopieren.
 4. Den Code zeitnah mit `set Volvo1 authCode <code>` an FHEM übergeben.
 
-Access- und Refresh-Tokens werden im FHEM-Key-Value-Store abgelegt und automatisch erneuert. `get Volvo1 tokenInfo` zeigt Tokenstatus und Gültigkeit, nicht die Tokenwerte. `set Volvo1 reauth` löscht gespeicherte Tokens und startet die Anmeldung erneut.
+Access- und Refresh-Tokens werden im FHEM-Key-Value-Store abgelegt und automatisch verwaltet. `get Volvo1 tokenInfo` zeigt Tokenstatus und Gültigkeit, nicht die Tokenwerte.
+
+### Automatische Erneuerung und erneute Anmeldung
+
+- Das Modul erneuert das Access-Token mit dem gespeicherten Refresh-Token, sobald es beim nächsten Authentifizierungs-/Abruflauf als abgelaufen gilt. Der Lauf findet beim Start und danach im konfigurierten Abrufrhythmus statt; es gibt keinen separaten Timer, der genau auf den Ablaufzeitpunkt des Tokens wartet.
+- Als Ablaufzeitpunkt verwendet das Modul vorsorglich einen Sicherheitsabstand: bei einer Token-Laufzeit von mehr als 10 Minuten setzt es den Zeitpunkt, ab dem ein Refresh nötig ist, bis zu 10 Minuten vor den vom Server gemeldeten Ablauf; bei kürzerer Laufzeit beträgt der Abstand 10 Prozent. Ein Fahrzeugbefehl löst bei einem bereits abgelaufenen Token ebenfalls zuerst den Refresh aus. Antwortet die Befehls-API mit HTTP 401, erneuert das Modul das Token und wiederholt den Befehl einmal.
+- Eine neue interaktive Volvo-Anmeldung ist nötig, wenn noch kein Refresh-Token vorhanden ist oder Volvo den Refresh ablehnt, etwa weil die Berechtigung widerrufen oder der Refresh-Token ungültig geworden ist. Dann `set Volvo1 reauth` ausführen, sich erneut bei Volvo anmelden und einen frischen Autorisierungscode mit `set Volvo1 authCode <code>` übergeben. Schlägt ein automatischer Refresh fehl, zeigt das Modul den Status `error` und den Fehler in `lastError`; die erneute Anmeldung wird nicht automatisch im Browser durchgeführt.
+- Nach Änderungen an Client-ID, Client-Secret, VCC API Key oder Scopes ebenfalls `reauth` ausführen. Eine Scope-Änderung löscht die gespeicherten Tokens bereits automatisch; sie erteilt aber keine neue Freigabe bei Volvo.
+
+### Technische Umsetzung
+
+VolvoConnect verwendet den OAuth2 Authorization-Code-Ablauf mit PKCE (S256): Das Modul berechnet aus einem im Modul hinterlegten Code-Verifier eine SHA-256-Challenge und baut daraus die Volvo-Login-URL. Nach dem Login wird der kurzlebige, einmal verwendbare Autorisierungscode manuell an FHEM übergeben und zusammen mit Redirect-URI und Verifier am Volvo-Token-Endpunkt gegen Access- und Refresh-Token getauscht; Client-ID und Client-Secret werden dabei zur Client-Authentifizierung verwendet. Token-Austausch und Refresh laufen nicht-blockierend über FHEMs `HttpUtils_NonblockingGet`; gespeichert werden Tokenwerte und der interne Gültigkeitszeitpunkt als JSON im FHEM-Key-Value-Store. Die Tokenwerte werden weder als Readings ausgegeben noch von `tokenInfo` angezeigt.
 
 ### Schritt-für-Schritt-Ablauf
 
