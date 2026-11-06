@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 0bd4004 fix(VolvoConnect): Keycloak-Service mit minimalem
+  openid-Scope testen [VolvoConnect]
+  Keycloak lehnt die Legacy-Scopes (energy:state:read, conve:*) ab.
+  Fur Keycloak wird jetzt nur der minimale openid-Scope angefordert,
+  wahrend Legacy-Service alle bisherigen Scopes nutzt.
+  Dies ermoglicht es, die Keycloak-OAuth-Implementierung zu testen
+  und die genauen Scope-Namen fur Keycloak zu identifizieren.
 - feature: 2026-11-05 f755708 feat(VolvoConnect): Add dual OAuth 2.0 service
   support via keycloakService attribute [VolvoConnect]
   Add keycloakService attribute (0=Legacy, 1=Keycloak) to support both OAuth
