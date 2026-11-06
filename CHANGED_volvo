@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-06 41ed930 cleanup(debug-logging): remove debug log calls and
+  function
+  The token persistence bug has been verified as fixed. Remove all file-based
+  debug logging calls and the VolvoConnect_DebugLog() function to keep the
+  code clean. The core fix (preserving stored tokens when keycloakService
+  attribute changes) remains in place.
+  Testing confirmed: Keycloak tokens now persist correctly after FHEM restart.
 - bugfix: 2026-11-06 6e426c6 fix(token-persistence): keep stored tokens when
   keycloakService attribute changes
   Only clear in-memory tokens when service changes
