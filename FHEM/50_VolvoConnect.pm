@@ -128,10 +128,11 @@ sub VolvoConnect_SetAuthStatus($$);
 
 sub VolvoConnect_LoadTokensFromKey($$) {
     my ($hash, $key) = @_;
+    
     my ($err, $value) = getKeyValue($key);
     
     if ($err) {
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Token load error for key '$key': $err";
+        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Token load error for key '$key': $err";
         return;
     }
     
@@ -160,15 +161,17 @@ sub VolvoConnect_LoadTokensFromKey($$) {
     Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Stored token data loaded from key '$key' "
         . "(access token: " . ($hasAccessToken ? "yes" : "no")
         . ", refresh token: " . ($hasRefreshToken ? "yes" : "no") . ").";
-        VolvoConnect_SetAuthStatus($hash, "authenticated")
-            if ($hasAccessToken || $hasRefreshToken);
+    VolvoConnect_SetAuthStatus($hash, "authenticated")
+        if ($hasAccessToken || $hasRefreshToken);
     return 1;
 }
 
 sub VolvoConnect_LoadTokens($) {
     my ($hash) = @_;
     my $currentKey = VolvoConnect_TokenKey($hash);
-    return if (VolvoConnect_LoadTokensFromKey($hash, $currentKey));
+    if (VolvoConnect_LoadTokensFromKey($hash, $currentKey)) {
+        return;
+    }
 
     my $legacyKey = "VolvoConnect_" . $hash->{NAME};
     if (VolvoConnect_LoadTokensFromKey($hash, $legacyKey)) {
@@ -234,8 +237,9 @@ sub VolvoConnect_CheckAuthAndFetch($);
 
 sub VolvoConnect_StartupCheck($) {
     my ($hash) = @_;
+    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - >>> StartupCheck called, init_done=$main::init_done";
     if (!$main::init_done) {
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Startup delayed: init_done not set.";
+        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Startup delayed: init_done not set, rescheduling in 5 sec.";
         InternalTimer(time() + 5, "VolvoConnect_StartupCheck", $hash, 0);
         return;
     }
@@ -243,13 +247,16 @@ sub VolvoConnect_StartupCheck($) {
     Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Startup check started "
         . "(init_done=$main::init_done, saved authStatus="
         . (ReadingsVal($hash->{NAME}, "authStatus", "missing")) . ").";
+    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - StartupCheck: calling LoadTokens...";
     VolvoConnect_LoadTokens($hash);
+    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - StartupCheck: LoadTokens finished, accessToken=".(defined($hash->{helper}{accessToken})?"yes":"no");
     readingsDelete($hash, "authStatus");
     VolvoConnect_RestoreState($hash);
     VolvoConnect_ForceAuthStatus($hash);
     Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Startup status after restore: "
         . ($hash->{helper}{authStatus} // "missing") . ".";
     InternalTimer(time() + 1, "VolvoConnect_CheckAuthAndFetch", $hash, 0);
+    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - <<< StartupCheck finished";
 }
 
 sub VolvoConnect_ForceAuthStatus($) {
@@ -270,15 +277,17 @@ sub VolvoConnect_SaveTokens($) {
         refreshToken    => $hash->{helper}{refreshToken},
         tokenValidUntil => $hash->{helper}{tokenValidUntil}
     };
-    my $err = setKeyValue(VolvoConnect_TokenKey($hash), encode_json($tokens));
+    my $json = encode_json($tokens);
+    my $key = VolvoConnect_TokenKey($hash);
+    my $err = setKeyValue($key, $json);
     if (defined($err) && $err ne "") {
         Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Could not store token data: $err";
         return;
     }
 
-    my ($readErr, $storedValue) = getKeyValue(VolvoConnect_TokenKey($hash));
+    my ($readErr, $storedValue) = getKeyValue($key);
     if ($readErr || !defined($storedValue) || $storedValue eq "") {
-        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Stored token data could not be verified.";
+        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Stored token data could not be verified. readErr='".($readErr//"")."', defined=".(defined($storedValue)?"yes":"no").", empty=".(($storedValue//"") eq ""?"yes":"no");
     } else {
         my $hasRefreshToken = defined($hash->{helper}{refreshToken})
             && $hash->{helper}{refreshToken} ne "";
@@ -440,6 +449,7 @@ sub VolvoConnect_Initialize($) {
 
     $hash->{AttrList} = "vin client_id client_secret vcc_api_key redirect_uri interval interval_slow interval_location "
         . "keycloakService:0,1 "
+        . "loglevel:0,1,2,3,4,5 "
         . "disable:0,1 disabledForIntervals "
         . "scope_capabilities:0-deaktiviert,1-aktiviert "
         . "scope_warnings:0-deaktiviert,1-aktiviert "
@@ -487,7 +497,9 @@ sub VolvoConnect_Define($$) {
 
     my $name = $a[0];
     $hash->{NOTIFYDEV} = "global";
+    Log3 $name, 4, "VolvoConnect ($name) - >>> Define called, calling LoadTokens...";
     VolvoConnect_LoadTokens($hash);
+    Log3 $name, 4, "VolvoConnect ($name) - Define: LoadTokens finished, accessToken=".(defined($hash->{helper}{accessToken})?"yes":"no");
     readingsDelete($hash, "login_url");
     readingsDelete($hash, "accessToken");
     readingsDelete($hash, "refreshToken");
@@ -507,8 +519,10 @@ sub VolvoConnect_Define($$) {
     $attr{$name}{stateFormat}   = "{VolvoConnect_StateIcon('$name')}";
 
     RemoveInternalTimer($hash);
+    Log3 $name, 4, "VolvoConnect ($name) - Define: scheduling StartupCheck in 60 seconds";
     InternalTimer(time() + 60, "VolvoConnect_StartupCheck", $hash, 0);
 
+    Log3 $name, 4, "VolvoConnect ($name) - <<< Define finished";
     return undef;
 }
 
@@ -527,7 +541,18 @@ sub VolvoConnect_Attr($$$$) {
             if ($attrName eq "vin");
         if (grep { $_ eq $attrName } ("vin", "client_id", "client_secret", "vcc_api_key", "redirect_uri", "keycloakService")) {
             delete $hash->{helper}{loginUrl} if ($attrName eq "keycloakService");
-            VolvoConnect_ClearTokens($hash) if ($attrName eq "keycloakService");
+            # IMPORTANT: When keycloakService changes, only clear in-memory tokens, but keep storage!
+            if ($attrName eq "keycloakService") {
+                Log3 $name, 3, "VolvoConnect ($name) - keycloakService changed to $attrVal, clearing in-memory tokens...";
+                delete $hash->{helper}{accessToken};
+                delete $hash->{helper}{refreshToken};
+                delete $hash->{helper}{tokenValidUntil};
+                delete $hash->{helper}{authCodeProcessing};
+                delete $hash->{helper}{pendingCommand};
+                delete $hash->{helper}{tokenRefreshInFlight};
+                VolvoConnect_ClearAuthCode($hash);
+                # DO NOT call setKeyValue(undef) - we want to keep the stored tokens!
+            }
             RemoveInternalTimer($hash);
             InternalTimer(time() + 2, "VolvoConnect_CheckAuthAndFetch", $hash, 0);
         }
@@ -1841,6 +1866,7 @@ sub VolvoConnect_CheckAuthAndFetch($) {
     my $refreshToken    = $hash->{helper}{refreshToken};
     my $tokenValidUntil = $hash->{helper}{tokenValidUntil} || 0;
     my $now             = time();
+
 
     Log3 $name, 4, "VolvoConnect ($name) - Auth decision: access="
         . (defined($accessToken) && $accessToken ne "" ? "yes" : "no")
