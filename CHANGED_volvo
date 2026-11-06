@@ -2,6 +2,11 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-06 23b8591 chore: Update controls files with latest
+  timestamps
+- documentation: 2026-11-06 f4a3890 docs: Add note about Keycloak scope
+  handling in VolvoConnect
+  Trigger workflow to regenerate controls_all.txt with latest timestamp.
 - bugfix: 2026-11-06 0bd4004 fix(VolvoConnect): Keycloak-Service mit minimalem
   openid-Scope testen
   Keycloak lehnt die Legacy-Scopes (energy:state:read, conve:*) ab.
