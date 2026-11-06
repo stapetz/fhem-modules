@@ -1858,51 +1858,62 @@ sub VolvoConnect_CheckAuthAndFetch($) {
 
         my $enc_client_id    = urlEncode($client_id);
         my $enc_redirect_uri = urlEncode($redirect_uri);
-        my @scopes = ("openid", "energy:state:read");
-        push(@scopes, "energy:capability:read")
-            if (VolvoConnect_ScopeEnabled($name, "scope_capabilities"));
-        push(@scopes, "conve:warnings")
-            if (VolvoConnect_ScopeEnabled($name, "scope_warnings"));
-        push(@scopes, "conve:brake_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_brakes"));
-        push(@scopes, "conve:doors_status", "conve:lock_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_doors"));
-        push(@scopes, "conve:windows_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_windows"));
-        push(@scopes, "conve:engine_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_engine_status"));
-        push(@scopes, "conve:vehicle_relation")
-            if (VolvoConnect_ScopeEnabled($name, "scope_vehicle_relation"));
-        push(@scopes, "conve:commands")
-            if (VolvoConnect_ScopeEnabled($name, "scope_commands"));
-        push(@scopes, "conve:command_accessibility")
-            if (VolvoConnect_ScopeEnabled($name, "scope_command_accessibility"));
-        push(@scopes, "conve:honk_flash")
-            if (VolvoConnect_ScopeEnabled($name, "scope_honk_flash"));
-        push(@scopes, "conve:lock")
-            if (VolvoConnect_ScopeEnabled($name, "scope_lock"));
-        push(@scopes, "conve:unlock")
-            if (VolvoConnect_ScopeEnabled($name, "scope_unlock"));
-        push(@scopes, "conve:climatization_start_stop")
-            if (VolvoConnect_ScopeEnabled($name, "scope_climatization"));
-        push(@scopes, "conve:engine_start_stop")
-            if (VolvoConnect_ScopeEnabled($name, "scope_engine_commands"));
-        push(@scopes, "conve:fuel_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_fuel"));
-        push(@scopes, "conve:battery_charge_level")
-            if (VolvoConnect_ScopeEnabled($name, "scope_battery_charge"));
-        push(@scopes, "conve:odometer_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_odometer"));
-        push(@scopes, "conve:trip_statistics")
-            if (VolvoConnect_ScopeEnabled($name, "scope_statistics"));
-        push(@scopes, "conve:tyre_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_tyres"));
-        push(@scopes, "conve:diagnostics_engine_status")
-            if (VolvoConnect_ScopeEnabled($name, "scope_engine_diagnostics"));
-        push(@scopes, "conve:diagnostics_workshop")
-            if (VolvoConnect_ScopeEnabled($name, "scope_workshop_diagnostics"));
-        push(@scopes, "location:read")
-            if (VolvoConnect_ScopeEnabled($name, "scope_location"));
+        
+        my @scopes;
+        my $useKeycloak = VolvoConnect_IsKeycloakService($hash);
+        
+        if ($useKeycloak) {
+            # Keycloak-basierte OAuth: Beginne mit minimalem Set
+            # Die exakten Scope-Namen für Keycloak sind noch zu ermitteln
+            @scopes = ("openid");
+        } else {
+            # Legacy Volvo ID Service
+            @scopes = ("openid", "energy:state:read");
+            push(@scopes, "energy:capability:read")
+                if (VolvoConnect_ScopeEnabled($name, "scope_capabilities"));
+            push(@scopes, "conve:warnings")
+                if (VolvoConnect_ScopeEnabled($name, "scope_warnings"));
+            push(@scopes, "conve:brake_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_brakes"));
+            push(@scopes, "conve:doors_status", "conve:lock_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_doors"));
+            push(@scopes, "conve:windows_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_windows"));
+            push(@scopes, "conve:engine_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_engine_status"));
+            push(@scopes, "conve:vehicle_relation")
+                if (VolvoConnect_ScopeEnabled($name, "scope_vehicle_relation"));
+            push(@scopes, "conve:commands")
+                if (VolvoConnect_ScopeEnabled($name, "scope_commands"));
+            push(@scopes, "conve:command_accessibility")
+                if (VolvoConnect_ScopeEnabled($name, "scope_command_accessibility"));
+            push(@scopes, "conve:honk_flash")
+                if (VolvoConnect_ScopeEnabled($name, "scope_honk_flash"));
+            push(@scopes, "conve:lock")
+                if (VolvoConnect_ScopeEnabled($name, "scope_lock"));
+            push(@scopes, "conve:unlock")
+                if (VolvoConnect_ScopeEnabled($name, "scope_unlock"));
+            push(@scopes, "conve:climatization_start_stop")
+                if (VolvoConnect_ScopeEnabled($name, "scope_climatization"));
+            push(@scopes, "conve:engine_start_stop")
+                if (VolvoConnect_ScopeEnabled($name, "scope_engine_commands"));
+            push(@scopes, "conve:fuel_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_fuel"));
+            push(@scopes, "conve:battery_charge_level")
+                if (VolvoConnect_ScopeEnabled($name, "scope_battery_charge"));
+            push(@scopes, "conve:odometer_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_odometer"));
+            push(@scopes, "conve:trip_statistics")
+                if (VolvoConnect_ScopeEnabled($name, "scope_statistics"));
+            push(@scopes, "conve:tyre_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_tyres"));
+            push(@scopes, "conve:diagnostics_engine_status")
+                if (VolvoConnect_ScopeEnabled($name, "scope_engine_diagnostics"));
+            push(@scopes, "conve:diagnostics_workshop")
+                if (VolvoConnect_ScopeEnabled($name, "scope_workshop_diagnostics"));
+            push(@scopes, "location:read")
+                if (VolvoConnect_ScopeEnabled($name, "scope_location"));
+        }
         my $enc_scopes = urlEncode(join(" ", @scopes));
         my $enc_challenge    = urlEncode($code_challenge);
 
