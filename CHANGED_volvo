@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-06 db15a12 debug: add comprehensive logging to token
+  persistence flow
 - feature: 2026-11-06 7526c72 feat(VolvoConnect): Fuge loglevel-Attribut hinzu
   Ermoglicht Benutzer, das Log-Level pro Device zu steuern:
   attr VolvoNEU loglevel 4
