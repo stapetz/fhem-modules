@@ -2,6 +2,12 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 6e426c6 fix(token-persistence): keep stored tokens when
+  keycloakService attribute changes
+  Only clear in-memory tokens when service changes
+  Preserve tokens in storage so they can be reloaded
+  This fixes token loss after attribute restore from fhem.save
+  Aligns behavior with Legacy service handling
 - bugfix: 2026-11-06 fbb3f61 fix(token-persistence): reload tokens after
   keycloakService attribute change
 - change: 2026-11-06 70c90ed debug: add CheckAuthAndFetch logging to trace
