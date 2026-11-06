@@ -512,7 +512,9 @@ sub VolvoConnect_Attr($$$$) {
     if ($cmd eq "set") {
         VolvoConnect_ClearEndpointFetchTimes($hash)
             if ($attrName eq "vin");
-        if (grep { $_ eq $attrName } ("vin", "client_id", "client_secret", "vcc_api_key", "redirect_uri")) {
+        if (grep { $_ eq $attrName } ("vin", "client_id", "client_secret", "vcc_api_key", "redirect_uri", "keycloakService")) {
+            delete $hash->{helper}{loginUrl} if ($attrName eq "keycloakService");
+            VolvoConnect_ClearTokens($hash) if ($attrName eq "keycloakService");
             RemoveInternalTimer($hash);
             InternalTimer(time() + 2, "VolvoConnect_CheckAuthAndFetch", $hash, 0);
         }
