@@ -2,6 +2,16 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 bce392a fix(VolvoConnect): Keycloak fordert jetzt alle
+  conve:* Scopes an [VolvoConnect]
+  Keycloak unterstutzt die gleichen conve:* Scope-Namen wie Legacy.
+  Nur energy:state:read ist Legacy-spezifisch.
+  Das Modul fordert jetzt:
+  openid (immer)
+  conve:* Scopes (fur aktivierte Fahrzeugdaten)
+  energy:capability:read (optional)
+  location:read (optional)
+  Refs #Keycloak-Scope-Anforderer
 - bugfix: 2026-11-06 08325bf fix: Correct dev update command to use
   controls_volvo.txt
   FHEM braucht eine controls-Datei (.txt), nicht die .pm-Datei direkt.

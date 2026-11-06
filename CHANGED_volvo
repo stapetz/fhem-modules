@@ -2,6 +2,16 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 bce392a fix(VolvoConnect): Keycloak fordert jetzt alle
+  conve:* Scopes an
+  Keycloak unterstutzt die gleichen conve:* Scope-Namen wie Legacy.
+  Nur energy:state:read ist Legacy-spezifisch.
+  Das Modul fordert jetzt:
+  openid (immer)
+  conve:* Scopes (fur aktivierte Fahrzeugdaten)
+  energy:capability:read (optional)
+  location:read (optional)
+  Refs #Keycloak-Scope-Anforderer
 - change: 2026-11-06 23b8591 chore: Update controls files with latest
   timestamps
 - documentation: 2026-11-06 f4a3890 docs: Add note about Keycloak scope
