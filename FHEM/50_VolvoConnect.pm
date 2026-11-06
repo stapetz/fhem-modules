@@ -129,10 +129,23 @@ sub VolvoConnect_SetAuthStatus($$);
 sub VolvoConnect_LoadTokensFromKey($$) {
     my ($hash, $key) = @_;
     my ($err, $value) = getKeyValue($key);
-    return if ($err || !defined($value) || $value eq "");
+    
+    if ($err) {
+        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Token load error for key '$key': $err";
+        return;
+    }
+    
+    if (!defined($value) || $value eq "") {
+        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - No token data found for key '$key'.";
+        return;
+    }
 
     my $tokens = eval { decode_json($value) };
-    return if (!$tokens || ref($tokens) ne "HASH");
+    
+    if (!$tokens || ref($tokens) ne "HASH") {
+        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Failed to decode token JSON for key '$key': " . ($@ // "unknown error");
+        return;
+    }
 
     $hash->{helper}{accessToken} = $tokens->{accessToken}
         if (defined($tokens->{accessToken}));
@@ -144,7 +157,7 @@ sub VolvoConnect_LoadTokensFromKey($$) {
         && $hash->{helper}{accessToken} ne "";
     my $hasRefreshToken = defined($hash->{helper}{refreshToken})
         && $hash->{helper}{refreshToken} ne "";
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Stored token data loaded "
+    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Stored token data loaded from key '$key' "
         . "(access token: " . ($hasAccessToken ? "yes" : "no")
         . ", refresh token: " . ($hasRefreshToken ? "yes" : "no") . ").";
         VolvoConnect_SetAuthStatus($hash, "authenticated")
