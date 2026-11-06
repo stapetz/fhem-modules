@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 1b05cfd fix(VolvoConnect):
+  keycloakService-Attribut-Wechsel invalidiert Cache
+  Wenn keycloakService zwischen Legacy und Keycloak gewechselt wird,
+  mussen folgende Caches geloscht werden:
+  loginUrl (Auth-Endpoint-spezifisch)
+  Tokens (OAuth2-Provider-spezifisch)
+  Endpoint-Fetch-Times (konnen unterschiedliche Endpoints sein)
+  Refs #OAuth-Service-Switch
 - bugfix: 2026-11-06 bce392a fix(VolvoConnect): Keycloak fordert jetzt alle
   conve:* Scopes an
   Keycloak unterstutzt die gleichen conve:* Scope-Namen wie Legacy.
