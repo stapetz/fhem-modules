@@ -573,11 +573,17 @@ sub VolvoConnect_Attr($$$$) {
             if ($attrName eq "vin");
         if (grep { $_ eq $attrName } ("vin", "client_id", "client_secret", "vcc_api_key", "redirect_uri", "keycloakService")) {
             delete $hash->{helper}{loginUrl} if ($attrName eq "keycloakService");
+            # IMPORTANT: When keycloakService changes, only clear in-memory tokens, but keep storage!
             if ($attrName eq "keycloakService") {
-                VolvoConnect_DebugLog("Attr: keycloakService changed, clearing tokens and reloading...");
-                VolvoConnect_ClearTokens($hash);
-                VolvoConnect_LoadTokens($hash);
-                VolvoConnect_DebugLog("Attr: keycloakService - tokens reloaded after clear");
+                Log3 $name, 3, "VolvoConnect ($name) - keycloakService changed to $attrVal, clearing in-memory tokens...";
+                delete $hash->{helper}{accessToken};
+                delete $hash->{helper}{refreshToken};
+                delete $hash->{helper}{tokenValidUntil};
+                delete $hash->{helper}{authCodeProcessing};
+                delete $hash->{helper}{pendingCommand};
+                delete $hash->{helper}{tokenRefreshInFlight};
+                VolvoConnect_ClearAuthCode($hash);
+                # DO NOT call setKeyValue(undef) - we want to keep the stored tokens!
             }
             RemoveInternalTimer($hash);
             InternalTimer(time() + 2, "VolvoConnect_CheckAuthAndFetch", $hash, 0);
