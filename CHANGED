@@ -2,6 +2,9 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 d1c278f fix: Correct FHEM update command syntax to 'update
+  all'
+  Der korrekte FHEM-Befehl ist 'update all <URL>', nicht nur 'update <URL>'.
 - documentation: 2026-11-06 714d8f2 docs: Add update-command instruction to
   Copilot guidelines
   Nach jedem Push auf 'dev' wird der FHEM-Update-Befehl in voller
