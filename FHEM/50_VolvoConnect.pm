@@ -440,6 +440,7 @@ sub VolvoConnect_Initialize($) {
 
     $hash->{AttrList} = "vin client_id client_secret vcc_api_key redirect_uri interval interval_slow interval_location "
         . "keycloakService:0,1 "
+        . "loglevel:0,1,2,3,4,5 "
         . "disable:0,1 disabledForIntervals "
         . "scope_capabilities:0-deaktiviert,1-aktiviert "
         . "scope_warnings:0-deaktiviert,1-aktiviert "
