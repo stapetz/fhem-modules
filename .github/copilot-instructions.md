@@ -40,13 +40,17 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 ## 4. Ausgabe-Formatierung für den Chat
 * **Kompakt und modular:** Gib nur die relevanten FHEM-Subroutinen (z. B. `X_Set`, `X_Parse`) aus, die geändert werden müssen, anstatt das gesamte, riesige `.pm`-Modul neu zu schreiben.
 
-## 5. Update-Befehl nach Push auf `dev`
-* **Nach jeder Änderung und jedem Push auf den `dev`-Branch:** Zeige den FHEM-Update-Befehl mit der korrekten controls-Datei vom `dev`-Branch:
+## 5. Update-Befehl nach Push auf `dev` - PFLICHT!
+* **Nach JEDEM Push auf den `dev`-Branch:** Zeige SOFORT den FHEM-Update-Befehl für den Test mit der korrekten controls-Datei vom `dev`-Branch.
+* **Format für VolvoConnect-Modul:**
   ```
   update all https://raw.githubusercontent.com/stapetz/fhem-modules/dev/controls_volvo.txt
   ```
-  WICHTIG: FHEM erwartet eine **controls-Datei** (`.txt`), NICHT die `.pm`-Datei direkt! Die controls-Datei lädt das Modul vom dev-Branch herunter.
-  Dies ermöglicht es dem Benutzer, die Änderungen sofort aus dem `dev`-Branch in FHEM zu testen, ohne auf einen `main`-Release warten zu müssen.
+* **Wichtig für den Benutzer:**
+  - FHEM erwartet eine **controls-Datei** (`.txt`), NICHT die `.pm`-Datei direkt!
+  - Die controls-Datei lädt das Modul vom `dev`-Branch herunter (NICHT vom `main`!)
+  - Der Benutzer kann damit sofort Änderungen aus `dev` in FHEM testen, ohne auf `main`-Release zu warten.
+  - Dies ist eine STANDARDPROZEDUR, die nach jedem erfolgreichen Push gilt.
 
 ## Fragen und Änderungen
 
