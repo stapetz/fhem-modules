@@ -39,3 +39,15 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 
 ## 4. Ausgabe-Formatierung für den Chat
 * **Kompakt und modular:** Gib nur die relevanten FHEM-Subroutinen (z. B. `X_Set`, `X_Parse`) aus, die geändert werden müssen, anstatt das gesamte, riesige `.pm`-Modul neu zu schreiben.
+
+## 5. Update-Befehl nach Push auf `dev`
+* **Nach jeder Änderung und jedem Push auf den `dev`-Branch:** Zeige den vollständigen FHEM-Update-Befehl in dieser exakten Syntax an:
+  ```
+  update https://github.com/stapetz/fhem-modules/raw/dev/controls_all.txt
+  ```
+  Dies ermöglicht es dem Benutzer, die Änderungen sofort in FHEM zu testen, ohne auf einen `main`-Release warten zu müssen.
+
+## Fragen und Änderungen
+
+Wenn mir eine Frage gestellt wird, antworte ich mit: „folgendes dazu:"
+Ich nehme zunächst keine Änderungen vor, sondern frage nach, ob diese Änderungen durchgeführt werden sollen.
