@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-06 7526c72 feat(VolvoConnect): Fuge loglevel-Attribut hinzu
+  Ermoglicht Benutzer, das Log-Level pro Device zu steuern:
+  attr VolvoNEU loglevel 4
+  Nutzlich fur Debugging von Token-Problemen und OAuth-Flow.
 - change: 2026-11-06 034ff58 debug(VolvoConnect): Verbessere Token-Lade-Logging
   fur Troubleshooting
   Detaillierte Logs beim Token-Laden helfen, Probleme beim Reload
