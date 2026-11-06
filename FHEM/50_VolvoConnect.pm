@@ -28,6 +28,14 @@ use Digest::SHA qw(sha256);
 # PKCE-Verifier used for OAuth 2.0 authorization code flow with PKCE
 my $GLOBAL_VERIFIER = "fhem_volvo_connect_secure_code_verifier_long_string_77_characters";
 
+sub VolvoConnect_DebugLog($) {
+    my ($msg) = @_;
+    open(my $fh, '>>', '/tmp/volvo_debug.log') or return;
+    my $timestamp = scalar(localtime());
+    print $fh "$timestamp | $msg\n";
+    close($fh);
+}
+
 # Dummy-Werte nur als Platzhalter
 my $DUMMY_VIN       = "HIER_VIN_EINTRAGEN";
 my $DUMMY_CLIENT_ID = "HIER_CLIENT_ID_EINTRAGEN";
@@ -128,33 +136,33 @@ sub VolvoConnect_SetAuthStatus($$);
 
 sub VolvoConnect_LoadTokensFromKey($$) {
     my ($hash, $key) = @_;
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - >> LoadTokensFromKey: key=$key";
+    VolvoConnect_DebugLog(">> LoadTokensFromKey: key=$key");
     
     my ($err, $value) = getKeyValue($key);
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - getKeyValue returned: err='$err', value_defined=".(defined($value)?"yes":"no").", value_empty=".(($value//"") eq ""?"yes":"no");
+    VolvoConnect_DebugLog("getKeyValue returned: err='".($err//"")."', value_defined=".(defined($value)?"yes":"no").", value_empty=".(($value//"") eq ""?"yes":"no"));
     
     if ($err) {
         Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Token load error for key '$key': $err";
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - << LoadTokensFromKey: returning undef (error)";
+        VolvoConnect_DebugLog("<< LoadTokensFromKey: returning undef (error)");
         return;
     }
     
     if (!defined($value) || $value eq "") {
         Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - No token data found for key '$key'.";
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - << LoadTokensFromKey: returning undef (no data)";
+        VolvoConnect_DebugLog("<< LoadTokensFromKey: returning undef (no data)");
         return;
     }
 
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Token data found, length=".length($value).", trying JSON decode...";
+    VolvoConnect_DebugLog("Token data found, length=".length($value).", trying JSON decode...");
     my $tokens = eval { decode_json($value) };
     
     if (!$tokens || ref($tokens) ne "HASH") {
         Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Failed to decode token JSON for key '$key': " . ($@ // "unknown error");
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - << LoadTokensFromKey: returning undef (decode failed)";
+        VolvoConnect_DebugLog("<< LoadTokensFromKey: returning undef (decode failed)");
         return;
     }
 
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - JSON decode successful, loading tokens...";
+    VolvoConnect_DebugLog("JSON decode successful, loading tokens...");
     $hash->{helper}{accessToken} = $tokens->{accessToken}
         if (defined($tokens->{accessToken}));
     $hash->{helper}{refreshToken} = $tokens->{refreshToken}
@@ -168,33 +176,34 @@ sub VolvoConnect_LoadTokensFromKey($$) {
     Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Stored token data loaded from key '$key' "
         . "(access token: " . ($hasAccessToken ? "yes" : "no")
         . ", refresh token: " . ($hasRefreshToken ? "yes" : "no") . ").";
+    VolvoConnect_DebugLog("Tokens loaded: accessToken=$hasAccessToken, refreshToken=$hasRefreshToken");
     VolvoConnect_SetAuthStatus($hash, "authenticated")
         if ($hasAccessToken || $hasRefreshToken);
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - << LoadTokensFromKey: returning 1 (success)";
+    VolvoConnect_DebugLog("<< LoadTokensFromKey: returning 1 (success)");
     return 1;
 }
 
 sub VolvoConnect_LoadTokens($) {
     my ($hash) = @_;
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - >>> LoadTokens called";
+    VolvoConnect_DebugLog(">>> LoadTokens called");
     my $currentKey = VolvoConnect_TokenKey($hash);
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Trying current key: $currentKey";
+    VolvoConnect_DebugLog("Trying current key: $currentKey");
     if (VolvoConnect_LoadTokensFromKey($hash, $currentKey)) {
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - LoadTokens: Current key succeeded, returning";
+        VolvoConnect_DebugLog("LoadTokens: Current key succeeded, returning");
         return;
     }
 
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Current key failed, trying legacy key";
+    VolvoConnect_DebugLog("Current key failed, trying legacy key");
     my $legacyKey = "VolvoConnect_" . $hash->{NAME};
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Trying legacy key: $legacyKey";
+    VolvoConnect_DebugLog("Trying legacy key: $legacyKey");
     if (VolvoConnect_LoadTokensFromKey($hash, $legacyKey)) {
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - LoadTokens: Legacy key succeeded, migrating to current key";
+        VolvoConnect_DebugLog("LoadTokens: Legacy key succeeded, migrating to current key");
         VolvoConnect_SaveTokens($hash);
         return;
     }
 
     Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - No stored token found.";
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - >>> LoadTokens finished, no tokens loaded";
+    VolvoConnect_DebugLog(">>> LoadTokens finished, no tokens loaded");
 }
 
 sub VolvoConnect_RestoreState($) {
@@ -287,34 +296,36 @@ sub VolvoConnect_ForceAuthStatus($) {
 
 sub VolvoConnect_SaveTokens($) {
     my ($hash) = @_;
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - >>> SaveTokens called";
+    VolvoConnect_DebugLog(">>> SaveTokens called");
     my $tokens = {
         accessToken     => $hash->{helper}{accessToken},
         refreshToken    => $hash->{helper}{refreshToken},
         tokenValidUntil => $hash->{helper}{tokenValidUntil}
     };
     my $json = encode_json($tokens);
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - SaveTokens: JSON length=".length($json);
+    VolvoConnect_DebugLog("SaveTokens: JSON length=".length($json));
     my $key = VolvoConnect_TokenKey($hash);
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - SaveTokens: key=$key";
+    VolvoConnect_DebugLog("SaveTokens: key=$key");
     my $err = setKeyValue($key, $json);
     if (defined($err) && $err ne "") {
         Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Could not store token data: $err";
-        Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - <<< SaveTokens failed";
+        VolvoConnect_DebugLog("<<< SaveTokens failed: $err");
         return;
     }
 
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - setKeyValue succeeded, verifying...";
+    VolvoConnect_DebugLog("setKeyValue succeeded, verifying...");
     my ($readErr, $storedValue) = getKeyValue($key);
     if ($readErr || !defined($storedValue) || $storedValue eq "") {
-        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Stored token data could not be verified. readErr='$readErr', defined=".(defined($storedValue)?"yes":"no").", empty=".(($storedValue//"") eq ""?"yes":"no");
+        Log3 $hash->{NAME}, 2, "VolvoConnect ($hash->{NAME}) - Stored token data could not be verified. readErr='".($readErr//"")."', defined=".(defined($storedValue)?"yes":"no").", empty=".(($storedValue//"") eq ""?"yes":"no");
+        VolvoConnect_DebugLog("Verification failed: readErr='".($readErr//"")."', defined=".(defined($storedValue)?"yes":"no")."");
     } else {
         my $hasRefreshToken = defined($hash->{helper}{refreshToken})
             && $hash->{helper}{refreshToken} ne "";
         Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - Token data stored successfully "
             . "(refresh token: " . ($hasRefreshToken ? "yes" : "no") . ").";
+        VolvoConnect_DebugLog("Token stored successfully, hasRefresh=$hasRefreshToken");
     }
-    Log3 $hash->{NAME}, 4, "VolvoConnect ($hash->{NAME}) - <<< SaveTokens finished";
+    VolvoConnect_DebugLog("<<< SaveTokens finished");
 }
 
 sub VolvoConnect_ClearTokens($) {
@@ -2103,14 +2114,14 @@ sub VolvoConnect_TokenCallback($$$) {
     my $refresh_margin = $expires_in > 600 ? 600 : int($expires_in / 10);
     my $valid_until = time() + $expires_in - $refresh_margin;
 
-    Log3 $name, 4, "VolvoConnect ($name) - TokenCallback: Setting tokens (expires_in=$expires_in, refresh_margin=$refresh_margin)";
+    VolvoConnect_DebugLog(">>> TokenCallback: Setting tokens (expires_in=$expires_in, refresh_margin=$refresh_margin)");
     $hash->{helper}{accessToken} = $decoded->{access_token};
     $hash->{helper}{tokenValidUntil} = $valid_until;
     $hash->{helper}{refreshToken} = $decoded->{refresh_token}
         if (exists($decoded->{refresh_token}));
-    Log3 $name, 4, "VolvoConnect ($name) - TokenCallback: calling SaveTokens...";
+    VolvoConnect_DebugLog("TokenCallback: calling SaveTokens...");
     VolvoConnect_SaveTokens($hash);
-    Log3 $name, 4, "VolvoConnect ($name) - TokenCallback: SaveTokens finished";
+    VolvoConnect_DebugLog("TokenCallback: SaveTokens finished");
 
     VolvoConnect_ClearAuthCode($hash);
     VolvoConnect_SetAuthStatus($hash, "authenticated");
