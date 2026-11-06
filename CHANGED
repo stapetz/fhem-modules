@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-06 b41eeb6 docs: Correct update command to use dev
+  branch direct URL
+  Nach Push auf dev: Nutze direkte Module-URL vom dev-Branch statt
+    controls_all.txt,
+  da FHEM standardmaig main holt.
+  update
+    https://raw.githubusercontent.com/stapetz/fhem-modules/dev/FHEM/50_VolvoConnect.pm
 - change: 2026-11-06 23b8591 chore: Update controls files with latest
   timestamps [VolvoConnect]
 - documentation: 2026-11-06 f4a3890 docs: Add note about Keycloak scope
