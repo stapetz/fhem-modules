@@ -41,15 +41,12 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 * **Kompakt und modular:** Gib nur die relevanten FHEM-Subroutinen (z. B. `X_Set`, `X_Parse`) aus, die geändert werden müssen, anstatt das gesamte, riesige `.pm`-Modul neu zu schreiben.
 
 ## 5. Update-Befehl nach Push auf `dev`
-* **Nach jeder Änderung und jedem Push auf den `dev`-Branch:** Zeige den FHEM-Update-Befehl mit der aktuellen Commit-ID und der direkten Modul-URL vom `dev`-Branch:
+* **Nach jeder Änderung und jedem Push auf den `dev`-Branch:** Zeige den FHEM-Update-Befehl mit der korrekten controls-Datei vom `dev`-Branch:
   ```
-  update https://raw.githubusercontent.com/stapetz/fhem-modules/dev/FHEM/<modulname>.pm
+  update all https://raw.githubusercontent.com/stapetz/fhem-modules/dev/controls_volvo.txt
   ```
-  Für VolvoConnect (das Hauptmodul dieser Serie):
-  ```
-  update https://raw.githubusercontent.com/stapetz/fhem-modules/dev/FHEM/50_VolvoConnect.pm
-  ```
-  Dies holt die aktuellste Version direkt aus dem `dev`-Branch, ohne dass der Umweg über `controls_all.txt` oder `main` nötig ist. Der Benutzer kann die Änderungen sofort testen.
+  WICHTIG: FHEM erwartet eine **controls-Datei** (`.txt`), NICHT die `.pm`-Datei direkt! Die controls-Datei lädt das Modul vom dev-Branch herunter.
+  Dies ermöglicht es dem Benutzer, die Änderungen sofort aus dem `dev`-Branch in FHEM zu testen, ohne auf einen `main`-Release warten zu müssen.
 
 ## Fragen und Änderungen
 
