@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-06 714d8f2 docs: Add update-command instruction to
+  Copilot guidelines
+  Nach jedem Push auf 'dev' wird der FHEM-Update-Befehl in voller
+  Syntax angezeigt, damit der Benutzer Anderungen sofort in FHEM testen kann.
 - bugfix: 2026-11-06 0bd4004 fix(VolvoConnect): Keycloak-Service mit minimalem
   openid-Scope testen [VolvoConnect]
   Keycloak lehnt die Legacy-Scopes (energy:state:read, conve:*) ab.
