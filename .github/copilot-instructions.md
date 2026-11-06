@@ -43,7 +43,7 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 ## 5. Update-Befehl nach Push auf `dev`
 * **Nach jeder Änderung und jedem Push auf den `dev`-Branch:** Zeige den vollständigen FHEM-Update-Befehl in dieser exakten Syntax an:
   ```
-  update https://github.com/stapetz/fhem-modules/raw/dev/controls_all.txt
+  update all https://github.com/stapetz/fhem-modules/raw/dev/controls_all.txt
   ```
   Dies ermöglicht es dem Benutzer, die Änderungen sofort in FHEM zu testen, ohne auf einen `main`-Release warten zu müssen.
 
