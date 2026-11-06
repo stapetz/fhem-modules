@@ -573,7 +573,12 @@ sub VolvoConnect_Attr($$$$) {
             if ($attrName eq "vin");
         if (grep { $_ eq $attrName } ("vin", "client_id", "client_secret", "vcc_api_key", "redirect_uri", "keycloakService")) {
             delete $hash->{helper}{loginUrl} if ($attrName eq "keycloakService");
-            VolvoConnect_ClearTokens($hash) if ($attrName eq "keycloakService");
+            if ($attrName eq "keycloakService") {
+                VolvoConnect_DebugLog("Attr: keycloakService changed, clearing tokens and reloading...");
+                VolvoConnect_ClearTokens($hash);
+                VolvoConnect_LoadTokens($hash);
+                VolvoConnect_DebugLog("Attr: keycloakService - tokens reloaded after clear");
+            }
             RemoveInternalTimer($hash);
             InternalTimer(time() + 2, "VolvoConnect_CheckAuthAndFetch", $hash, 0);
         }
