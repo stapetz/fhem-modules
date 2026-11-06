@@ -2,6 +2,21 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-06 f0d4468 fix(token-persistence): keep stored tokens when
+  keycloakService attribute changes
+  Only clear in-memory tokens when service changes
+  Preserve tokens in storage so they can be reloaded
+  This fixes token loss after attribute restore from fhem.save
+  Aligns behavior with Legacy service handling
+- change: 2026-11-06 e3b5505 debug(VolvoConnect): Verbessere Token-Lade-Logging
+  fur Troubleshooting
+  Detaillierte Logs beim Token-Laden helfen, Probleme beim Reload
+  zu diagnostizieren:
+  Zeige getKeyValue-Fehler
+  Log fehlende Tokens explizit
+  Log JSON-Dekodierungsfehler
+  Zeige Key-Name fur besseres Debugging
+  Refs #Token-Reload-Debug
 - feature: 2026-11-06 bf9dec5 feat(VolvoConnect): Release v1.1.0 - Keycloak
   OAuth2 Migration
   Volvo stellt die Legacy Volvo ID Service bis 31. Jan 2027 zur Verfugung.
