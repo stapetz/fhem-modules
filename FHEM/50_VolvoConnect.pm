@@ -1849,6 +1849,7 @@ sub VolvoConnect_GenerateChallengeS256($) {
 sub VolvoConnect_CheckAuthAndFetch($) {
     my ($hash) = @_;
     my $name = $hash->{NAME};
+    VolvoConnect_DebugLog(">>> CheckAuthAndFetch called for $name");
 
     if (IsDisabled($name)) {
         delete $hash->{helper}{forceFullUpdate};
@@ -1859,6 +1860,7 @@ sub VolvoConnect_CheckAuthAndFetch($) {
 
     if (!defined($hash->{helper}{accessToken})
         || !defined($hash->{helper}{refreshToken})) {
+        VolvoConnect_DebugLog("CheckAuthAndFetch: accessToken or refreshToken missing, calling LoadTokens");
         VolvoConnect_LoadTokens($hash);
     }
 
@@ -1888,6 +1890,8 @@ sub VolvoConnect_CheckAuthAndFetch($) {
     my $tokenValidUntil = $hash->{helper}{tokenValidUntil} || 0;
     my $now             = time();
 
+    VolvoConnect_DebugLog("CheckAuthAndFetch: accessToken=".($accessToken?"yes":"no").", refreshToken=".($refreshToken?"yes":"no").", validUntil=$tokenValidUntil, now=$now");
+
     Log3 $name, 4, "VolvoConnect ($name) - Auth decision: access="
         . (defined($accessToken) && $accessToken ne "" ? "yes" : "no")
         . ", refresh=" . (defined($refreshToken) && $refreshToken ne "" ? "yes" : "no")
@@ -1900,18 +1904,21 @@ sub VolvoConnect_CheckAuthAndFetch($) {
         my $remaining = $tokenValidUntil - $now;
         VolvoConnect_SetAuthStatus($hash, "authenticated");
         Log3 $name, 4, "VolvoConnect ($name) - Using cached Access Token (valid for another $remaining sec).";
+        VolvoConnect_DebugLog("CheckAuthAndFetch: Using cached access token, valid for $remaining sec");
         VolvoConnect_FetchVehicleData($hash, $accessToken);
         VolvoConnect_Reschedule($hash, AttrVal($name, "interval", 300));
         return;
     }
 
     if (defined($refreshToken) && $refreshToken ne "") {
+        VolvoConnect_DebugLog("CheckAuthAndFetch: Access token expired/missing, refreshing...");
         VolvoConnect_SetAuthStatus($hash, "token_refreshing");
         Log3 $name, 4, "VolvoConnect ($name) - Access Token expired. Refreshing token...";
         VolvoConnect_RefreshAccessToken($hash, $refreshToken);
         return;
     }
 
+    VolvoConnect_DebugLog("CheckAuthAndFetch: No valid tokens, requesting auth code");
     my $authCodeAttr = AttrVal($name, "authCode", undef);
     Log3 $name, 4, "VolvoConnect ($name) - Login decision: authCode="
         . (defined($authCodeAttr) && $authCodeAttr ne "" ? "present" : "missing") . ".";
