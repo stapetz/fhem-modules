@@ -2,6 +2,27 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-06 bf9dec5 feat(VolvoConnect): Release v1.1.0 - Keycloak
+  OAuth2 Migration [VolvoConnect]
+  Volvo stellt die Legacy Volvo ID Service bis 31. Jan 2027 zur Verfugung.
+  Ab sofort werden neue OAuth2-Clients mit der Keycloak-basierten
+  Volvo ID IAM ausgegeben (Prefix: vid-dcr-*).
+  Features:
+  Duale OAuth2-Service-Unterstutzung (Legacy + Keycloak)
+  Automatische Service-Erkennung via keycloakService-Attribut
+  Vollstandige conve:* Scope-Anforderung fur beide Services
+  Transparenter Service-Wechsel mit Cache-Invalidierung
+  Migration fur Benutzer:
+  1. Neue Client ID/Secret von Volvo Developer Portal besorgen (vid-dcr-*
+    Prefix)
+  2. In FHEM: attr <Device> keycloakService 1
+  3. Alte Client ID/Secret in die neuen Keycloak-Zugangsdaten andern
+  4. set <Device> reauth und OAuth-Flow durchfuhren
+  Kompatibilitat:
+  Legacy-Authentifizierung (keycloakService=0) funktioniert weiterhin
+  Bestehende Konfigurationen laufen ohne Anderungen
+  Neue Installationen sollten sofort Keycloak nutzen
+  Refs #Keycloak-OAuth-Implementation
 - change: 2026-10-30 8224daf Release SolaxModbus 1.0.2 [SolaxModbus]
   Optische Anpassungen und kleine Optimierungen.
 - change: 2026-10-30 f0240b7 Release GavazziEM24 1.0.2 [GavazziEM24]
