@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-06 d4b821d docs(instructions): Verdeutliche
+  Update-Pflicht nach jedem dev-Push
+  Section 5 nun deutlicher: NACH JEDEM Push auf dev muss
+  die Update-URL mit controls_volvo.txt ausgegeben werden.
 - bugfix: 2026-11-06 1b05cfd fix(VolvoConnect):
   keycloakService-Attribut-Wechsel invalidiert Cache [VolvoConnect]
   Wenn keycloakService zwischen Legacy und Keycloak gewechselt wird,
