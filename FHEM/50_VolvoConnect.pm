@@ -22,6 +22,7 @@ use Digest::SHA qw(sha256);
 #   1 = Neue Keycloak-basierte Volvo ID IAM
 #
 # Migration Stichtag: https://developer.volvocars.com/news/volvoid-migration/
+# Note: Keycloak scope handling - minimal openid scope for initial testing
 # ============================================================================
 
 # PKCE-Verifier used for OAuth 2.0 authorization code flow with PKCE
