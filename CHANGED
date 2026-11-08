@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 51dc85b fix(controls): include www/volvoconnect files in
+  update manifest
+  Update workflow to include www/volvoconnect/ files (oauth-redirect.pl,
+    README.md, styles.css)
+  Regenerate controls_volvo.txt with all necessary files for FHEM update
+  Ensures OAuth handler and documentation are downloaded when users run 'update
+    all'
 - documentation: 2026-11-08 8e20f74 docs: add mandatory update command reminder
   after each dev push
   After every successful push to dev branch, the FHEM update command must be
