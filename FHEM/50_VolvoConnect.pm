@@ -2605,9 +2605,12 @@ sub VolvoConnect_Reschedule($$) {
         <li>Copy the generated VCC API key. It is sent as the
             <code>vcc-api-key</code> header with every vehicle API request.</li>
         <li>Copy the OAuth client ID and client secret from the application's credentials.</li>
-        <li>Configure the redirect URI. It must be identical character by character to
-            <code>redirect_uri</code> in FHEM, including scheme, host, port, path and
-            trailing slash.</li>
+        <li><strong>Configure the redirect URI to:</strong> <code style="color: #0066cc; font-weight: bold;">https://your-fhem-host/fhem/volvoconnect/</code>
+            <br>Replace <code>your-fhem-host</code> with your FHEM hostname or domain.
+            It must be identical character by character to <code>redirect_uri</code> in FHEM,
+            including scheme, host, port, path and trailing slash. This is the recommended new
+            redirect handler as of November 2026, which provides an interactive device selector
+            and automatic code submission.</li>
         <li>Enable or request the APIs and permissions required by the application. The
             selected <code>scope_*</code> attributes in FHEM must correspond to permissions
             available to the application.</li>
@@ -2807,8 +2810,11 @@ sub VolvoConnect_Reschedule($$) {
         <li>Den erzeugten VCC API Key kopieren. Das Modul sendet ihn bei jeder API-Abfrage im
             Header <code>vcc-api-key</code>.</li>
         <li>OAuth Client ID und Client Secret aus den Zugangsdaten der Anwendung kopieren.</li>
-        <li>Die Redirect-URI konfigurieren. Sie muss einschließlich Schema, Host, Port, Pfad und
-            abschließendem Slash exakt dem FHEM-Attribut <code>redirect_uri</code> entsprechen.</li>
+        <li><strong>Redirect-URI eintragen:</strong> <code style="color: #0066cc; font-weight: bold;">https://your-fhem-host/fhem/volvoconnect/</code>
+            <br><code>your-fhem-host</code> durch den FHEM-Hostnamen oder die Domain ersetzen.
+            Sie muss einschließlich Schema, Host, Port, Pfad und abschließendem Slash exakt dem FHEM-Attribut 
+            <code>redirect_uri</code> entsprechen. Dies ist die empfohlene neue Redirect-URL seit November 2026, 
+            die einen interaktiven Geräte-Wähler und automatische Code-Übergabe bietet.</li>
         <li>Die benötigten APIs und Berechtigungen für die Anwendung aktivieren bzw. beantragen.
             Die in FHEM aktivierten <code>scope_*</code>-Attribute müssen zu den im Portal
             verfügbaren Berechtigungen passen.</li>
