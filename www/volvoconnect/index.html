@@ -1,71 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VolvoConnect OAuth Handler</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-top: 0; }
+        .status { padding: 15px; border-radius: 4px; margin: 15px 0; font-weight: bold; }
+        .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .info { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .code-box { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all; margin: 15px 0; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+    </style>
 </head>
-<body style="font-family: Arial; padding: 20px; background: #f5f5f5;">
-    <div style="max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #333; margin-top: 0;">VolvoConnect OAuth</h1>
-        <p id="status" style="padding: 15px; border-radius: 4px; font-weight: bold;"></p>
-        
-        <div id="codeSection" style="display: none; background: #f9f9f9; padding: 15px; border-radius: 4px; border: 1px solid #ddd; margin: 15px 0;">
-            <p style="color: #666; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase;">Authorization Code</p>
-            <div id="code" style="font-family: monospace; background: white; padding: 12px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; margin-bottom: 12px;"></div>
-            <button id="copyBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold;">Copy Code</button>
+<body>
+    <div class="container">
+        <h1>VolvoConnect OAuth 2.0 Handler</h1>
+        <div id="status"></div>
+        <div id="codeSection" style="display: none;">
+            <p><strong>Authorization Code:</strong></p>
+            <div class="code-box" id="code"></div>
+            <button class="btn-primary" onclick="copyCode()">Copy Code</button>
         </div>
-
-        <div id="errorSection" style="display: none; background: #fff3cd; padding: 15px; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
-            <p style="margin: 0;"><strong>Authorization Error</strong></p>
-            <p id="errorMsg" style="margin: 8px 0 0 0; font-size: 14px;"></p>
+        <div id="errorSection" style="display: none;">
+            <p><strong>Error Details:</strong></p>
+            <div class="code-box" id="error"></div>
         </div>
     </div>
 
     <script>
-        console.log('Script executing...');
-        
         var code = new URL(window.location).searchParams.get('code');
         var error = new URL(window.location).searchParams.get('error');
         var errorDesc = new URL(window.location).searchParams.get('error_description');
         
-        console.log('Parameters:', {code, error, errorDesc});
-        
         var statusEl = document.getElementById('status');
         var codeSection = document.getElementById('codeSection');
         var codeEl = document.getElementById('code');
-        var copyBtn = document.getElementById('copyBtn');
         var errorSection = document.getElementById('errorSection');
-        var errorMsg = document.getElementById('errorMsg');
+        var errorEl = document.getElementById('error');
         
         if (error) {
-            statusEl.textContent = '⚠️ Error: ' + error;
-            statusEl.style.background = '#ffebee';
-            statusEl.style.color = '#c62828';
-            statusEl.style.border = '1px solid #ffcdd2';
-            errorMsg.textContent = decodeURIComponent(errorDesc || '');
+            statusEl.className = 'status error';
+            statusEl.textContent = '⚠️ Authorization Error: ' + error;
+            errorEl.textContent = decodeURIComponent(errorDesc || 'Unknown error');
             errorSection.style.display = 'block';
         } else if (code) {
-            statusEl.textContent = '✓ Authorization successful!';
-            statusEl.style.background = '#e8f5e9';
-            statusEl.style.color = '#2e7d32';
-            statusEl.style.border = '1px solid #c8e6c9';
+            statusEl.className = 'status success';
+            statusEl.textContent = '✓ Authorization Successful!';
             codeEl.textContent = code;
             codeSection.style.display = 'block';
-            
-            copyBtn.onclick = function() {
-                navigator.clipboard.writeText(code).then(function() {
-                    copyBtn.textContent = '✓ Copied!';
-                    setTimeout(function() {
-                        copyBtn.textContent = 'Copy Code';
-                    }, 2000);
-                }).catch(function() {
-                    alert('Failed to copy: ' + code);
-                });
-            };
         } else {
-            statusEl.textContent = 'ℹ️ Waiting for OAuth parameters...';
-            statusEl.style.background = '#e3f2fd';
-            statusEl.style.color = '#1565c0';
-            statusEl.style.border = '1px solid #bbdefb';
+            statusEl.className = 'status info';
+            statusEl.textContent = 'ℹ️ OAuth Handler Ready';
+        }
+        
+        function copyCode() {
+            navigator.clipboard.writeText(code).then(function() {
+                alert('Code copied to clipboard!');
+            }).catch(function() {
+                alert('Failed to copy');
+            });
         }
     </script>
 </body>
