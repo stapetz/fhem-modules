@@ -34,7 +34,7 @@ jobs:
           modules = {
               "controls_volvo.txt": {
                   "primary": "FHEM/50_VolvoConnect.pm",
-                  "files": ["www/volvoconnect/oauth-redirect.pl", "www/volvoconnect/README.md", "www/volvoconnect/styles.css"]
+                  "files": ["www/volvoconnect/index.html", "www/volvoconnect/README.md"]
               },
               "controls_temperaturecollector.txt": {
                   "primary": "FHEM/50_TemperatureCollector.pm",
