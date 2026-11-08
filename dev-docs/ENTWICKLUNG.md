@@ -5,53 +5,6 @@ Sie wird **nicht** über FHEM `update` ausgeliefert: `update` lädt nur Dateien,
 `controls_*.txt` stehen, und der Ordner `dev-docs/` steht dort nie. Wer das Repository per
 `git clone` holt, bekommt sie allerdings mit.
 
-## 🔗 Referenz: Allgemeines Styleguide & Architektur
-
-Das Dokument [`entwicklerdoku_und_styleguides.md`](../fhem-cms/dev-docs/entwicklerdoku_und_styleguides.md)
-im `fhem-cms`-Repository definiert verbindliche Standard-Richtlinien für:
-- **Architektur & Design Patterns** (für alle neuen UI-Komponenten und Refactoring)
-- **Sicherheitsstandards** (Input-Validierung, sichere Systemaufrufe, Logging)
-- **Code-Qualität & Testing**
-- **Versionierung und Release-Prozesse**
-
-**Dieses Dokument ist ab sofort führend für alle Entwicklungen.** Modul-spezifische Besonderheiten
-stehen unten, orientieren sich aber an den Richtlinien aus dem Styleguide.
-
-## Platzhalter-Syntax (Dokumentation von Befehlen & Konfiguration)
-
-In dieser Dokumentation verwenden wir **Platzhalter in spitzklammern** (`<...>`) für variable Teile.
-Diese sind **nicht literal zu verstehen**, sondern zeigen, was der Benutzer/Entwickler dort eintragen soll.
-
-Es gibt zwei Optionen zur Platzierung:
-
-1. **Inline im Text oder Befehl** (Standard):
-   ```
-   python3 scripts/release.py <modul> <version> -m "Message"
-   ```
-   Hier würde ein Benutzer z.B. schreiben:
-   ```
-   python3 scripts/release.py volvo 1.0.5 -m "Bugfix"
-   ```
-
-2. **In Variablen oder Code-Kommentaren** (für längere Erklärungen):
-   ```perl
-   our $<Modul>_VERSION = '1.0.0';
-   ```
-   Hier würde konkret stehen:
-   ```perl
-   our $VolvoConnect_VERSION = '1.0.0';
-   ```
-
-**Wichtige Platzhalter in diesem Repository:**
-- `<modul>`: Der Modulschlüssel (z.B. `volvo`, `temperaturecollector`, `gavazzi`, `solax`, `dashboardhub`)
-- `<version>`: Semantische Versionsnummer (z.B. `1.2.0`, `1.0.1-dev`)
-- `<gerät>` oder `<name>`: Der Name eines Geräts in FHEM
-- `<datei>`: Dateiname oder Pfad
-- `<branch>`: Git-Branch-Name
-- `<typ>`: Der FHEM-Modultyp (z.B. `DashboardHub`, `VolvoConnect`)
-
----
-
 ## Inhalt des Repositories
 
 | Pfad | Zweck |
