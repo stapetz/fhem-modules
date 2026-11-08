@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-08 bea7355 feat(volvoconnect): add automatic authCode
+  setting with device selector to OAuth callback page
+  Extend index.html to display all VolvoConnect devices
+  Show authentication status for each device with visual badges
+  Add 'Set authCode' button for each device to automatically submit the OAuth
+    code
+  Add loading spinner and success feedback
+  Improve UI with device list and better styling
 - bugfix: 2026-11-08 2c9f3bc fix(update): correct file sizes in
   controls_volvo.txt
   index.html: 3297 bytes (was 3657)
