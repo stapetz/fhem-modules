@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-08 3bbf4d6 docs: correct CMS styleguide references
+  Refs stapetz/fhem-cms#58
 - documentation: 2026-11-08 9a66a22 docs: integrate new styleguide and document
   placeholder syntax
   Add reference to entwicklerdoku_und_styleguides.md as binding style guide
