@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-08 9a66a22 docs: integrate new styleguide and document
+  placeholder syntax
+  Add reference to entwicklerdoku_und_styleguides.md as binding style guide
+  Document placeholder syntax with two placement options
+  Update Copilot instructions to enforce styleguide standards
+  Enhance security and testing requirements
+  Clarify logging and input validation practices
 - change: 2026-11-06 41ed930 cleanup(debug-logging): remove debug log calls and
   function [VolvoConnect]
   The token persistence bug has been verified as fixed. Remove all file-based
