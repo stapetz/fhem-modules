@@ -2,6 +2,23 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-08 c8e31ee feat(volvoconnect): add OAuth handler page with
+  automatic code submission
+  Add interactive device selector showing all VolvoConnect devices
+  Display authentication status with visual badges for each device
+  Implement one-click authCode submission via 'Set authCode' button
+  Add automatic device list loading from FHEM
+  Include success feedback and error handling
+  Provide clear instructions for non-HTTPS setups
+  Improve UX with loading spinner and status indicators
+  This replaces the manual code copy-paste workflow with a streamlined
+  automatic submission process accessible at /fhem/volvoconnect/
+- documentation: 2026-11-08 37e1fc5 docs: clarify that main branch requires
+  explicit approval before pushing
+  Make it absolutely clear that:
+  dev: free to push after commits
+  main: NEVER push without explicit 'push to main' instruction from developer
+  This prevents accidental releases to main branch.
 - bugfix: 2026-11-08 f1911a1 fix(authCode): remove problematic CommandAttr call
   causing 'Please define del first' error [VolvoConnect]
   The VolvoConnect_ClearAuthCode() function was calling CommandAttr(undef, ...)
