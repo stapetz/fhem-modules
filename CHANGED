@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-08 8e20f74 docs: add mandatory update command reminder
+  after each dev push
+  After every successful push to dev branch, the FHEM update command must be
+  displayed to the developer for immediate testing of changes.
+  Command:
+  update all
+    https://raw.githubusercontent.com/stapetz/fhem-modules/dev/controls_volvo.txt
 - change: 2026-11-08 90b7c57 refactor(oauth-redirect): rename www/volvo to
   www/volvoconnect for consistency
   Follow fhem-cms naming convention where module-specific www assets are placed
