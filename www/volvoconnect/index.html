@@ -6,29 +6,92 @@
     <title>VolvoConnect OAuth Handler</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         h1 { color: #333; margin-top: 0; }
+        h2 { color: #555; font-size: 1.2em; margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
         .status { padding: 15px; border-radius: 4px; margin: 15px 0; font-weight: bold; }
         .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
         .info { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
         .code-box { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all; margin: 15px 0; }
-        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
         .btn-primary { background: #667eea; color: white; }
         .btn-primary:hover { background: #5568d3; }
+        .btn-success { background: #52bd8b; color: white; }
+        .btn-success:hover { background: #42a878; }
+        .btn-success:disabled { background: #ccc; cursor: not-allowed; }
+        .device-list { margin-top: 20px; }
+        .device-item { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            padding: 15px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 4px; 
+            margin-bottom: 12px; 
+            background: #fafafa;
+            transition: background 0.2s;
+        }
+        .device-item:hover { background: #f5f5f5; }
+        .device-info { flex: 1; }
+        .device-name { font-weight: bold; color: #333; font-size: 1.1em; }
+        .device-status { font-size: 0.9em; color: #666; margin-top: 5px; }
+        .status-badge { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 12px; 
+            font-size: 0.85em; 
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .badge-auth { background: #e8f5e9; color: #2e7d32; }
+        .badge-noauth { background: #ffebee; color: #c62828; }
+        .badge-unknown { background: #e3f2fd; color: #1565c0; }
+        .device-actions { display: flex; gap: 8px; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .spinner { 
+            display: inline-block; 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #667eea; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite; 
+            margin-right: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .success-message { 
+            color: #2e7d32; 
+            font-size: 0.9em;
+            padding: 8px 12px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            margin-top: 8px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>VolvoConnect OAuth 2.0 Handler</h1>
         <div id="status"></div>
+        
         <div id="codeSection" style="display: none;">
-            <p><strong>Authorization Code:</strong></p>
+            <h2>Authorization Code</h2>
+            <p><strong>Your Code:</strong></p>
             <div class="code-box" id="code"></div>
-            <button class="btn-primary" onclick="copyCode()">Copy Code</button>
+            <button class="btn-primary" onclick="copyCode()">📋 Copy Code</button>
+            
+            <h2>Devices</h2>
+            <div id="deviceList" class="device-list">
+                <div class="loading">
+                    <span class="spinner"></span>Loading VolvoConnect Devices...
+                </div>
+            </div>
         </div>
+        
         <div id="errorSection" style="display: none;">
-            <p><strong>Error Details:</strong></p>
+            <h2>Error Details</h2>
             <div class="code-box" id="error"></div>
         </div>
     </div>
@@ -43,6 +106,7 @@
         var codeEl = document.getElementById('code');
         var errorSection = document.getElementById('errorSection');
         var errorEl = document.getElementById('error');
+        var deviceListEl = document.getElementById('deviceList');
         
         if (error) {
             statusEl.className = 'status error';
@@ -54,6 +118,7 @@
             statusEl.textContent = '✓ Authorization Successful!';
             codeEl.textContent = code;
             codeSection.style.display = 'block';
+            loadDevices();
         } else {
             statusEl.className = 'status info';
             statusEl.textContent = 'ℹ️ OAuth Handler Ready';
@@ -65,6 +130,115 @@
             }).catch(function() {
                 alert('Failed to copy');
             });
+        }
+
+        function loadDevices() {
+            fetch('/fhem?cmd=list%20TYPE%3DVolvoConnect&XHR=1')
+                .then(response => response.text())
+                .then(data => {
+                    var devices = [];
+                    var lines = data.trim().split('\n');
+                    
+                    lines.forEach(line => {
+                        var match = line.match(/^([A-Za-z0-9_-]+)\s+TYPE/);
+                        if (match) {
+                            devices.push(match[1]);
+                        }
+                    });
+                    
+                    if (devices.length === 0) {
+                        deviceListEl.innerHTML = '<div class="status info">No VolvoConnect devices found</div>';
+                        return;
+                    }
+                    
+                    deviceListEl.innerHTML = '';
+                    
+                    devices.forEach(deviceName => {
+                        fetch('/fhem?cmd=get%20' + encodeURIComponent(deviceName) + '%20summary&XHR=1')
+                            .then(response => response.text())
+                            .then(summary => {
+                                var authStatus = 'unknown';
+                                var statusBadgeClass = 'badge-unknown';
+                                var statusIcon = '❓';
+                                
+                                if (summary.includes('authStatus: auth_valid')) {
+                                    authStatus = 'authenticated';
+                                    statusBadgeClass = 'badge-auth';
+                                    statusIcon = '✓';
+                                } else if (summary.includes('authStatus: auth_required')) {
+                                    authStatus = 'requires_auth';
+                                    statusBadgeClass = 'badge-noauth';
+                                    statusIcon = '⚠️';
+                                } else if (summary.includes('authStatus: auth_invalid')) {
+                                    authStatus = 'invalid_auth';
+                                    statusBadgeClass = 'badge-noauth';
+                                    statusIcon = '❌';
+                                }
+                                
+                                var deviceHTML = '<div class="device-item">' +
+                                    '<div class="device-info">' +
+                                    '  <div class="device-name">' + htmlEscape(deviceName) + '</div>' +
+                                    '  <div class="device-status">' +
+                                    '    <span class="status-badge ' + statusBadgeClass + '">' + statusIcon + ' ' + authStatus + '</span>' +
+                                    '  </div>' +
+                                    '</div>' +
+                                    '<div class="device-actions">' +
+                                    '  <button class="btn-success" onclick="setAuthCode(\'' + htmlEscape(deviceName) + '\')">Set authCode</button>' +
+                                    '  <div id="message-' + htmlEscape(deviceName) + '" class="success-message"></div>' +
+                                    '</div>' +
+                                    '</div>';
+                                
+                                deviceListEl.innerHTML += deviceHTML;
+                            })
+                            .catch(err => {
+                                console.error('Failed to load device summary for ' + deviceName + ':', err);
+                            });
+                    });
+                })
+                .catch(err => {
+                    console.error('Failed to load devices:', err);
+                    deviceListEl.innerHTML = '<div class="status error">Failed to load devices: ' + err.message + '</div>';
+                });
+        }
+
+        function setAuthCode(deviceName) {
+            var button = event.target;
+            button.disabled = true;
+            button.textContent = 'Setting...';
+            
+            var cmd = 'set ' + deviceName + ' authCode ' + code;
+            
+            fetch('/fhem?cmd=' + encodeURIComponent(cmd) + '&XHR=1')
+                .then(response => response.text())
+                .then(result => {
+                    var messageEl = document.getElementById('message-' + deviceName);
+                    messageEl.style.display = 'block';
+                    messageEl.textContent = '✓ Authorization code set successfully!';
+                    button.textContent = '✓ Set';
+                    button.style.background = '#4caf50';
+                    
+                    setTimeout(() => {
+                        messageEl.style.display = 'none';
+                        button.disabled = false;
+                        button.textContent = 'Set authCode';
+                        button.style.background = '';
+                    }, 3000);
+                })
+                .catch(err => {
+                    var messageEl = document.getElementById('message-' + deviceName);
+                    messageEl.style.display = 'block';
+                    messageEl.textContent = '❌ Failed: ' + err.message;
+                    messageEl.style.background = '#ffebee';
+                    messageEl.style.color = '#c62828';
+                    button.disabled = false;
+                    button.textContent = 'Set authCode';
+                });
+        }
+
+        function htmlEscape(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
