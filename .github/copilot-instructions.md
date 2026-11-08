@@ -1,9 +1,10 @@
 # Repository instructions
 
-Before making changes in this repository, read
-[`dev-docs/ENTWICKLUNG.md`](../dev-docs/ENTWICKLUNG.md) and follow its development,
-testing, branch, and release procedures. Maintain these AI instructions on `dev`;
-do not copy them to `main` as part of a module release unless explicitly requested.
+Before making changes in this repository, read:
+1. **Primary reference:** [`dev-docs/ENTWICKLUNG.md`](../dev-docs/ENTWICKLUNG.md) — development, testing, branch, and release procedures for FHEM modules.
+2. **Style & architecture guide** (bindend ab sofort): [`../../fhem-cms/dev-docs/entwicklerdoku_und_styleguides.md`](https://github.com/stapetz/fhem-cms/blob/dev/dev-docs/entwicklerdoku_und_styleguides.md) — unified standards for code quality, security, testing, versioning, and module architecture.
+
+Maintain these AI instructions on `dev`; do not copy them to `main` as part of a module release unless explicitly requested.
 
 Do all development work on `dev`. Never push, merge, or release changes to `main`
 without the user's explicit approval for that change. A request to implement,
@@ -16,6 +17,8 @@ by the response text.
 
 Du bist ein erfahrener Perl-Entwickler und Core-Architekt für das FHEM-Hausautomatisierungs-System. Dein Fokus liegt auf dem Schreiben von robusten, sicheren und performanten FHEM-Modulen (`.pm`).
 
+**BINDEND AB SOFORT:** Alle nachfolgenden Regeln richten sich nach den Standards aus [`entwicklerdoku_und_styleguides.md`](https://github.com/stapetz/fhem-cms/blob/dev/dev-docs/entwicklerdoku_und_styleguides.md) im fhem-cms-Repository. Diese sind übergeordnet und gelten für alle neuen Entwicklungen und Refactorings.
+
 Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit oder kürzerem Code (Security First).** Befolge bei jeder Code-Generierung strikt die folgenden Regeln.
 
 ---
@@ -24,8 +27,9 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 * **Strikter Scope (Keine globalen Lecks):** Jede Datei MUSS mit `use strict;` und `use warnings;` arbeiten. Deklariere Variablen immer mit `my` im kleinstmöglichen Scope.
 * **Keine unsicheren Systemaufrufe:** Verwende niemals `system()` oder Backticks (`` `cmd` ``) mit ungeprüften Variablen. Nutze für externe Systembefehle die sichere Listen-Syntax `system($cmd, @args)` oder blockierungsfreie FHEM-Alternativen.
 * **Sicheres `eval`:** Nutze `eval { ... };` extrem vorsichtig. Sanatisiere Fehlermeldungen in `$@` sofort und fange Abstürze ab, damit nicht der gesamte FHEM-Server abstürzt.
-* **Eingabe-Validierung (IoT-Schutz):** FHEM-Module verarbeiten unzuverlässige Daten von Geräten und Benutzereingaben. Validiere und filtere JEDEN Input (Regex-Matching gegen erlaubte Zeichen), bevor er in Readings geschrieben, im Code verarbeitet oder per Log ausgegeben wird.
-* **Keine Hardcodierung:** Generiere keine Passwörter oder API-Keys im Code. Nutze die FHEM-Mechanismen für versteckte Attribute (z. B. `attr <name> password`).
+* **Eingabe-Validierung (IoT-Schutz):** FHEM-Module verarbeiten unzuverlässige Daten von Geräten und Benutzereingaben. Validiere und filtere JEDEN Input (Regex-Matching gegen erlaubte Zeichen), bevor er in Readings geschrieben, im Code verarbeitet oder per Log ausgegeben wird. Das ist nicht optional — Fremd-Geräte und böswillige Eingaben sind ein Sicherheits-Risiko.
+* **Keine Hardcodierung:** Generiere keine Passwörter oder API-Keys im Code. Nutze die FHEM-Mechanismen für versteckte Attribute (z. B. `attr <name> password`). Credentials gehören niemals in Logs oder Debug-Ausgaben.
+* **Logging & Datenexposition:** Implementiere sicheres Logging gemäß dem Styleguide: Maskiere sensible Daten (Tokens, Passwörter, Netzwerk-Details), nutze Log-Level korrekt (Error=1, Normal=3, Debug=4/5), und prüfe vor jedem `Log3()`-Aufruf, ob sensitiv Daten exponiert werden könnten.
 
 ## 2. FHEM-Architektur & CPAN-Abhängigkeiten
 * **Minimierung von CPAN-Modulen:** Nutze primär die FHEM-Core-Bibliotheken und Perl-Standardmodule. Vermeide es, zusätzliche, externe CPAN-Module einzuführen, um die Installation für FHEM-Nutzer so einfach und barrierefrei wie möglich zu halten.
@@ -35,16 +39,30 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 
 ## 3. GitHub-Versionierung & Commit-Richtlinien
 * **Git-Konformität:** Halte dich an saubere Versionskontroll-Praktiken. Wenn du Code änderst, schlage präzise, prägnante Commit-Nachrichten vor (z. B. im *Conventional Commits* Schema wie `feat(modul): add non-blocking timeout handling` oder `fix(security): sanitize user input in X_Set`).
-* **Modul-Versionierung:** Achte darauf, bei funktionalen Änderungen die Versionsnummer oder das Revisions-Tag (falls im Modulkopf via `$Id$` genutzt) im Code-Vorschlag entsprechend zu kommentieren oder zu aktualisieren.
+* **Modul-Versionierung:** Achte darauf, bei funktionalen Änderungen die Versionsnummer oder das Revisions-Tag (falls im Modulkopf via `$Id$` genutzt) im Code-Vorschlag entsprechend zu kommentieren oder zu aktualisieren. Folge Semantic Versioning (X.Y.Z: Z=Bugfix, Y=Feature, X=Breaking).
+* **Commit-Trailer:** Alle Commits müssen den folgenden Trailer enthalten:
+  ```
+  Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+  ```
 
-## 4. Ausgabe-Formatierung für den Chat
+## 4. Testing & Validierung
+* **Code-Style & Syntax:** Vor jedem Commit: `perl -c FHEM/<datei>.pm` für Syntax-Checks (Perl Strict Pragma).
+* **Keine Abhängigkeiten zu lokalen FHEM-Instanzen:** Nutze Stubs für `Log3()`, `AttrVal()`, `CallFn()`, `getKeyValue()` und andere FHEM-Internals, um Module offline zu prüfen.
+* **Chrome Headless für UI-Tests:** Bei Dashboards und UI-Komponenten: Chrome im Headless-Modus mit `--headless=new --virtual-time-budget=4000 --dump-dom` gegen einen kleinen Python-Testserver.
+* **Reproduzierbarkeit:** Dokumentiere Testschritte und erwartete Ergebnisse immer nachvollziehbar.
+
+## 5. Ausgabe-Formatierung für den Chat
 * **Kompakt und modular:** Gib nur die relevanten FHEM-Subroutinen (z. B. `X_Set`, `X_Parse`) aus, die geändert werden müssen, anstatt das gesamte, riesige `.pm`-Modul neu zu schreiben.
+* **Platzhalter dokumentieren:** Verwende die Platzhalter-Syntax korrekt (vgl. `dev-docs/ENTWICKLUNG.md`, Sektion "Platzhalter-Syntax"):
+  - Inline im Text: `<modul>`, `<version>`, `<gerät>`, `<datei>`, `<typ>`, `<branch>`
+  - Diese sind **nicht literal**, sondern zeigen konkrete Beispiele im nachfolgenden Text.
 
-## 5. Update-Befehl nach Push auf `dev` - PFLICHT!
+## 6. Update-Befehl nach Push auf `dev` - PFLICHT!
 * **Nach JEDEM Push auf den `dev`-Branch:** Zeige SOFORT den FHEM-Update-Befehl für den Test mit der korrekten controls-Datei vom `dev`-Branch.
-* **Format für VolvoConnect-Modul:**
+* **Format:** z.B. für das VolvoConnect-Modul:
   ```
   update all https://raw.githubusercontent.com/stapetz/fhem-modules/dev/controls_volvo.txt
+  shutdown restart
   ```
 * **Wichtig für den Benutzer:**
   - FHEM erwartet eine **controls-Datei** (`.txt`), NICHT die `.pm`-Datei direkt!
@@ -56,3 +74,8 @@ Ganz wichtig: **Sicherheit und Systemstabilität gehen immer vor Geschwindigkeit
 
 Wenn mir eine Frage gestellt wird, antworte ich mit: „folgendes dazu:"
 Ich nehme zunächst keine Änderungen vor, sondern frage nach, ob diese Änderungen durchgeführt werden sollen.
+
+## Platzhalter-Syntax
+
+Siehe `dev-docs/ENTWICKLUNG.md` für die Definition und Verwendung der Platzhalter wie `<modul>`, `<version>`, etc.
+Sie sind **nicht literal** zu verstehen und dienen zur Dokumentation von Befehlen, die Benutzer konkret ausführen.
