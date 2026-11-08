@@ -2,6 +2,28 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- feature: 2026-11-08 ce881e7 feat(oauth-redirect): add VolvoConnect OAuth 2.0
+  redirect handler
+  Add a complete OAuth 2.0 redirect handler for VolvoConnect authentication:
+  www/volvo/oauth-redirect.pl: HTTP handler for OAuth authorization code
+    callback
+  Extracts and displays authorization codes
+  Shows user-friendly interface with copy-to-clipboard functionality
+  Handles OAuth errors with troubleshooting guidance
+  URL parameter parsing and validation
+  Proper HTTP headers for caching and security
+  www/volvo/README.md: Comprehensive configuration and usage documentation
+  Setup instructions for FHEM
+  Volvo Developer Portal configuration guide
+  Security considerations
+  Troubleshooting section
+  Examples for Legacy and Keycloak services
+  www/volvo/styles.css: Extended styling utilities
+  Dark mode support
+  Accessibility features (reduced motion, high contrast)
+  Print styles
+  Responsive design optimizations
+  This enables users to complete OAuth flow without manual URL parsing.
 - bugfix: 2026-11-08 71558f6 fix(authCode): remove problematic CommandAttr call
   causing 'Please define del first' error [VolvoConnect]
   The VolvoConnect_ClearAuthCode() function was calling CommandAttr(undef, ...)
