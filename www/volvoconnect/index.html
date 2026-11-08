@@ -136,18 +136,30 @@
             fetch('/fhem?cmd=list%20TYPE%3DVolvoConnect&XHR=1')
                 .then(response => response.text())
                 .then(data => {
+                    console.log('Raw response from FHEM:', data);
                     var devices = [];
                     var lines = data.trim().split('\n');
                     
-                    lines.forEach(line => {
-                        var match = line.match(/^([A-Za-z0-9_-]+)\s+TYPE/);
-                        if (match) {
-                            devices.push(match[1]);
+                    console.log('Number of lines:', lines.length);
+                    console.log('First line:', lines[0]);
+                    
+                    lines.forEach((line, index) => {
+                        console.log('Line ' + index + ':', line);
+                        // Look for lines containing "TYPE=VolvoConnect" and extract device name
+                        if (line.includes('TYPE=VolvoConnect') || line.includes('TYPE') && line.includes('VolvoConnect')) {
+                            // Device name is typically at the start before the first space
+                            var deviceName = line.split(/\s+/)[0];
+                            if (deviceName && deviceName.length > 0 && !devices.includes(deviceName)) {
+                                devices.push(deviceName);
+                                console.log('Found device:', deviceName);
+                            }
                         }
                     });
                     
+                    console.log('Extracted devices:', devices);
+                    
                     if (devices.length === 0) {
-                        deviceListEl.innerHTML = '<div class="status info">No VolvoConnect devices found</div>';
+                        deviceListEl.innerHTML = '<div class="status info">No VolvoConnect devices found. Check browser console for debug info.</div>';
                         return;
                     }
                     
