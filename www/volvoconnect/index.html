@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,7 +24,7 @@
         .container {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             width: 100%;
             padding: 40px;
@@ -38,7 +38,7 @@
         .logo {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -67,6 +67,7 @@
             border-radius: 8px;
             margin-bottom: 20px;
             display: none;
+            font-weight: 600;
         }
 
         .status.success {
@@ -88,11 +89,6 @@
             border: 1px solid #bbdefb;
             color: #1565c0;
             display: block;
-        }
-
-        .status-icon {
-            font-size: 20px;
-            margin-right: 8px;
         }
 
         .code-container {
@@ -127,6 +123,8 @@
             border: 1px solid #ddd;
             margin-bottom: 12px;
             line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
         .button-group {
@@ -146,17 +144,12 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
+            background: #5568d3;
         }
 
         .btn-secondary {
@@ -175,6 +168,7 @@
             color: #4caf50;
             margin-top: 8px;
             text-align: center;
+            font-weight: 600;
         }
 
         .error-details {
@@ -200,13 +194,6 @@
             color: #856404;
             font-size: 13px;
             line-height: 1.5;
-            margin-bottom: 8px;
-        }
-
-        .error-details ul {
-            margin-left: 20px;
-            color: #856404;
-            font-size: 13px;
         }
 
         .info-box {
@@ -223,108 +210,6 @@
 
         .info-box.visible {
             display: block;
-        }
-
-        .loading {
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 25px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            .code-value {
-                font-size: 12px;
-            }
-
-            button {
-                padding: 10px;
-                font-size: 13px;
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
-            }
-
-            .container {
-                background: #1e1e1e;
-                color: #e0e0e0;
-            }
-
-            h1, .code-value {
-                color: #e0e0e0;
-            }
-
-            .subtitle, .code-label {
-                color: #a0a0a0;
-            }
-
-            .code-container {
-                background: #2d2d2d;
-                border-color: #404040;
-            }
-
-            .code-value {
-                background: #1a1a1a;
-                border-color: #404040;
-                color: #e0e0e0;
-            }
-
-            .btn-secondary {
-                background: #2d2d2d;
-                color: #e0e0e0;
-                border-color: #404040;
-            }
-
-            .btn-secondary:hover {
-                background: #3d3d3d;
-            }
-
-            .info-box {
-                background: #2d2d2d;
-                border-color: #404040;
-                color: #b0b0b0;
-            }
         }
     </style>
 </head>
@@ -356,22 +241,23 @@
 
             <div class="info-box" id="infoBox">
                 <strong>ℹ️ How to use:</strong>
-                <p>Your authorization code has been retrieved from the OAuth provider. Follow these steps:</p>
-                <ol style="margin-left: 20px; margin-top: 8px;">
-                    <li>Copy the code using the button above</li>
-                    <li>Return to your FHEM VolvoConnect device configuration</li>
-                    <li>Paste the code into the authorization code field</li>
-                    <li>Complete the setup</li>
-                </ol>
+                <p style="margin-top: 8px;">Your authorization code has been retrieved. Copy it and paste into your FHEM VolvoConnect device configuration.</p>
             </div>
         </div>
     </div>
 
     <script>
+        console.log('OAuth Handler Script Starting...');
+        
         // Parse URL parameters
         function getUrlParameter(name) {
-            const url = new URL(window.location);
-            return url.searchParams.get(name);
+            try {
+                const url = new URL(window.location);
+                return url.searchParams.get(name);
+            } catch (e) {
+                console.error('Error parsing URL:', e);
+                return null;
+            }
         }
 
         // Get parameters from redirect URL
@@ -379,6 +265,8 @@
         const state = getUrlParameter('state');
         const error = getUrlParameter('error');
         const errorDescription = getUrlParameter('error_description');
+
+        console.log('URL Params:', { code, state, error, errorDescription });
 
         const statusEl = document.getElementById('status');
         const codeContainer = document.getElementById('codeContainer');
@@ -391,43 +279,57 @@
         const infoBox = document.getElementById('infoBox');
 
         function showStatus(message, type) {
+            console.log('ShowStatus:', message, type);
             statusEl.textContent = message;
-            statusEl.className = `status ${type} fade-in`;
+            statusEl.className = 'status ' + type;
         }
 
         function showError(errorCode, description) {
-            const fullDescription = decodeURIComponent(description || '');
-            errorMessage.textContent = `Error: ${errorCode}`;
+            console.log('ShowError:', errorCode, description);
+            const fullDescription = description ? decodeURIComponent(description) : '';
+            errorMessage.textContent = 'Error: ' + errorCode;
             if (fullDescription) {
-                errorMessage.innerHTML += `<br><small>${fullDescription}</small>`;
+                errorMessage.innerHTML += '<br><small>' + fullDescription + '</small>';
             }
             errorDetails.classList.add('visible');
-            showStatus(`⚠️ Authorization failed: ${errorCode}`, 'error');
+            showStatus('⚠️ Authorization failed: ' + errorCode, 'error');
         }
 
         // Copy to clipboard
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(code);
-                copyFeedback.style.display = 'block';
-                setTimeout(() => {
-                    copyFeedback.style.display = 'none';
-                }, 2000);
-                showStatus('✓ Code copied to clipboard', 'success');
-            } catch (err) {
-                showStatus('✗ Failed to copy code', 'error');
-            }
-        });
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                console.log('Copy clicked');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(code).then(function() {
+                        copyFeedback.style.display = 'block';
+                        setTimeout(function() {
+                            copyFeedback.style.display = 'none';
+                        }, 2000);
+                        showStatus('✓ Code copied to clipboard', 'success');
+                    }).catch(function(err) {
+                        console.error('Copy failed:', err);
+                        showStatus('✗ Failed to copy code', 'error');
+                    });
+                } else {
+                    console.warn('Clipboard API not available');
+                    showStatus('✗ Clipboard not available', 'error');
+                }
+            });
+        }
 
         // Reset
-        resetBtn.addEventListener('click', () => {
-            window.location.href = window.location.origin + window.location.pathname;
-        });
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                window.location.href = window.location.origin + window.location.pathname;
+            });
+        }
 
         // Process parameters
+        console.log('Processing parameters...');
         if (error) {
             showError(error, errorDescription);
         } else if (code) {
+            console.log('Code found:', code);
             codeValue.textContent = code;
             codeContainer.classList.add('visible');
             infoBox.classList.add('visible');
@@ -438,14 +340,7 @@
             showStatus('ℹ️ This page handles OAuth 2.0 redirects for VolvoConnect', 'info');
         }
 
-        // Keyboard shortcut: Ctrl+C to copy (if code exists)
-        if (code) {
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-                    navigator.clipboard.writeText(code);
-                }
-            });
-        }
+        console.log('OAuth Handler Script Ready');
     </script>
 </body>
 </html>
