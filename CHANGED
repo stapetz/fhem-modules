@@ -2,6 +2,20 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-08 74bb144 refactor(oauth-handler): switch from Perl to
+  HTML5/JavaScript
+  Remove oauth-redirect.pl (CGI execution not supported in FHEM www/)
+  Replace with pure HTML5 + JavaScript implementation (index.html)
+  No server-side code execution required
+  Works with any static web server configuration
+  Improved user experience with better styling and error handling
+  Update README.md to reflect HTML/JS approach
+  Update workflow and controls manifest for new files
+  Benefits:
+  Zero dependencies (no Perl/CGI needed)
+  More reliable execution (HTML/JS always works)
+  Smaller footprint (removed separate CSS file, embedded styles)
+  Better error handling and user feedback
 - bugfix: 2026-11-08 51dc85b fix(controls): include www/volvoconnect files in
   update manifest
   Update workflow to include www/volvoconnect/ files (oauth-redirect.pl,
