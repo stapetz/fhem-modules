@@ -2,6 +2,16 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 71558f6 fix(authCode): remove problematic CommandAttr call
+  causing 'Please define del first' error [VolvoConnect]
+  The VolvoConnect_ClearAuthCode() function was calling CommandAttr(undef, ...)
+    which
+  caused FHEM to throw 'Please define del first' errors every 5 minutes during
+    token
+  refresh. The direct $attr deletion is sufficient and correct.
+  This error occurred after every successful token refresh (which calls
+    ClearAuthCode).
+  Fixes: User report about repeated 'Please define del first' in logs
 - documentation: 2026-11-08 3bbf4d6 docs: correct CMS styleguide references
   Refs stapetz/fhem-cms#58
 - documentation: 2026-11-08 9a66a22 docs: integrate new styleguide and document
