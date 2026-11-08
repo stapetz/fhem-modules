@@ -2,6 +2,15 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-08 90b7c57 refactor(oauth-redirect): rename www/volvo to
+  www/volvoconnect for consistency
+  Follow fhem-cms naming convention where module-specific www assets are placed
+  under www/<modulename>/. This ensures the redirect handler is accessible at:
+  http://fhem-host/volvoconnect/oauth-redirect.pl
+  Update documentation with correct redirect URIs:
+  Local: http://localhost/volvoconnect/oauth-redirect.pl
+  Local network: http://fhem.fritz.box/volvoconnect/oauth-redirect.pl
+  External: http://fhem.apetz.de/fhem/volvoconnect/oauth-redirect.pl
 - feature: 2026-11-08 ce881e7 feat(oauth-redirect): add VolvoConnect OAuth 2.0
   redirect handler
   Add a complete OAuth 2.0 redirect handler for VolvoConnect authentication:
