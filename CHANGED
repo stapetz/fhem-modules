@@ -2,6 +2,11 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 8b36125 fix(volvoconnect): correct device list parsing for
+  simple line-based response
+  FHEM list TYPE=VolvoConnect returns simple newline-separated device names
+  Remove complex regex parsing and use simple line trimming instead
+  Each non-empty line is a valid device name
 - bugfix: 2026-11-08 0c110df fix(volvoconnect): improve device detection with
   debug logging
   Add console logging for device list parsing
