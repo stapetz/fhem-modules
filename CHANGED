@@ -2,6 +2,11 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 0c110df fix(volvoconnect): improve device detection with
+  debug logging
+  Add console logging for device list parsing
+  Improve regex pattern for VolvoConnect device detection
+  Show debug message to check browser console if no devices found
 - feature: 2026-11-08 bea7355 feat(volvoconnect): add automatic authCode
   setting with device selector to OAuth callback page
   Extend index.html to display all VolvoConnect devices
