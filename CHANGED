@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 57c4578 fix(oauth-handler): add .htaccess to set correct
+  content-type for HTML
+  FHEM was serving index.html as text/plain instead of text/html.
+  This .htaccess file ensures .html files are served with correct MIME type.
 - change: 2026-11-08 3c8c901 refactor(oauth-handler): create minimal,
   debuggable HTML version
   Replace complex CSS with inline styles and simplify JavaScript.
