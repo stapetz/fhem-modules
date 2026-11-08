@@ -2,6 +2,16 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 f1911a1 fix(authCode): remove problematic CommandAttr call
+  causing 'Please define del first' error
+  The VolvoConnect_ClearAuthCode() function was calling CommandAttr(undef, ...)
+    which
+  caused FHEM to throw 'Please define del first' errors every 5 minutes during
+    token
+  refresh. The direct $attr deletion is sufficient and correct.
+  This error occurred after every successful token refresh (which calls
+    ClearAuthCode).
+  Fixes: User report about repeated 'Please define del first' in logs
 - bugfix: 2026-11-06 f0d4468 fix(token-persistence): keep stored tokens when
   keycloakService attribute changes
   Only clear in-memory tokens when service changes
