@@ -314,7 +314,6 @@ sub VolvoConnect_ClearAuthCode($) {
     my ($hash) = @_;
     my $name = $hash->{NAME};
     delete $attr{$name}{authCode};
-    CommandAttr(undef, "del $name authCode") if (defined($defs{$name}));
 }
 
 sub VolvoConnect_ScopeEnabled($$) {
