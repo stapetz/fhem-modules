@@ -2,6 +2,15 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-08 87095dd docs(volvoconnect): update OAuth workflow
+  documentation with new handler URL
+  Document recommended redirect_uri: https://your-fhem-host/fhem/volvoconnect/
+  Explain the new automatic code submission flow with device selector
+  Add clear instructions for automatic vs manual code extraction
+  Add note for users without HTTPS: change URL from https to http before
+    submitting code
+  Update Define section examples to use new recommended redirect_uri
+  Improve documentation clarity in both English and German
 - bugfix: 2026-11-08 71558f6 fix(authCode): remove problematic CommandAttr call
   causing 'Please define del first' error
   The VolvoConnect_ClearAuthCode() function was calling CommandAttr(undef, ...)
