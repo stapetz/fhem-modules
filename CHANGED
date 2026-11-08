@@ -2,6 +2,17 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-08 3c8c901 refactor(oauth-handler): create minimal,
+  debuggable HTML version
+  Replace complex CSS with inline styles and simplify JavaScript.
+  This minimalist version should render reliably without styling issues.
+  File size: 3645 bytes (down from 10392).
+  Changes:
+  Remove external CSS classes
+  Use inline styles for all formatting
+  Simplify JavaScript (no async/await, arrow functions)
+  Direct DOM manipulation without dependencies
+  Better console logging for debugging
 - bugfix: 2026-11-08 b89382f fix(oauth-handler): add version comment to trigger
   update
   Add version comment to index.html to force FHEM update detection.
