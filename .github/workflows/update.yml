@@ -32,12 +32,30 @@ jobs:
           from pathlib import Path
 
           modules = {
-              "controls_volvo.txt": "FHEM/50_VolvoConnect.pm",
-              "controls_temperaturecollector.txt": "FHEM/50_TemperatureCollector.pm",
-              "controls_gavazzi.txt": "FHEM/70_GavazziEM24.pm",
-              "controls_solax.txt": "FHEM/70_SolaxModbus.pm",
-              "controls_dashboardhub.txt": "FHEM/50_DashboardHub.pm",
-              "controls_thermostatdashboard.txt": "FHEM/50_ThermostatDashboard.pm",
+              "controls_volvo.txt": {
+                  "primary": "FHEM/50_VolvoConnect.pm",
+                  "files": ["www/volvoconnect/oauth-redirect.pl", "www/volvoconnect/README.md", "www/volvoconnect/styles.css"]
+              },
+              "controls_temperaturecollector.txt": {
+                  "primary": "FHEM/50_TemperatureCollector.pm",
+                  "files": []
+              },
+              "controls_gavazzi.txt": {
+                  "primary": "FHEM/70_GavazziEM24.pm",
+                  "files": []
+              },
+              "controls_solax.txt": {
+                  "primary": "FHEM/70_SolaxModbus.pm",
+                  "files": []
+              },
+              "controls_dashboardhub.txt": {
+                  "primary": "FHEM/50_DashboardHub.pm",
+                  "files": []
+              },
+              "controls_thermostatdashboard.txt": {
+                  "primary": "FHEM/50_ThermostatDashboard.pm",
+                  "files": []
+              },
           }
           changed_timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H:%M:%S")
 
@@ -61,15 +79,29 @@ jobs:
 
           all_lines = []
 
-          for controls_name, module_name in modules.items():
+          for controls_name, config in modules.items():
               key = controls_name[len("controls_"):-len(".txt")]
-              module = Path(module_name)
+              module = Path(config["primary"])
+              lines = []
+              
               module_line = (
-                  f"UPD {last_update(module)} {module.stat().st_size} {module_name}"
+                  f"UPD {last_update(module)} {module.stat().st_size} {config['primary']}"
               )
+              lines.append(module_line)
               all_lines.append(module_line)
+              
+              for file in config["files"]:
+                  file_path = Path(file)
+                  if file_path.exists():
+                      file_line = (
+                          f"UPD {last_update(file)} {file_path.stat().st_size} {file}"
+                      )
+                      lines.append(file_line)
+                      all_lines.append(file_line)
+              
+              lines.append(changed_line(f"CHANGED_{key}"))
               Path(controls_name).write_text(
-                  "\n".join([module_line, changed_line(f"CHANGED_{key}")]) + "\n", encoding="ascii"
+                  "\n".join(lines) + "\n", encoding="ascii"
               )
 
           Path("controls_all.txt").write_text(
