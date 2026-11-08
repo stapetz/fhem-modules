@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 0130e86 fix(oauth-handler): simplify HTML and remove
+  problematic gradients
+  Remove linear-gradient styling (was causing blank page)
+  Use solid colors for better compatibility
+  Add extensive console logging for debugging
+  Simplify JavaScript (ES5 compatible)
+  Use simple colors instead of gradients
+  Verify proper DOM rendering
 - change: 2026-11-08 74bb144 refactor(oauth-handler): switch from Perl to
   HTML5/JavaScript
   Remove oauth-redirect.pl (CGI execution not supported in FHEM www/)
