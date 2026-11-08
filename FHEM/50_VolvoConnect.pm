@@ -2620,7 +2620,28 @@ sub VolvoConnect_Reschedule($$) {
         The module uses OAuth2 Authorization Code with PKCE. Run <code>set Volvo1 reauth</code>
         to clear stored tokens; then click the login link next to the device status to open
         Volvo's authorization URL with the configured scopes. After the Volvo ID login, Volvo redirects the browser to
-        the configured URI, for example:
+        the configured redirect URI with an authorization code.
+    </p>
+    <p>
+        <b>Recommended: Automatic code submission using the built-in handler</b><br>
+        Configure your redirect URI to point to FHEM's OAuth callback handler:
+    </p>
+    <code>https://your-fhem-host/fhem/volvoconnect/</code>
+    <p>
+        After successful login, Volvo redirects the browser to this URL with the authorization code as a query parameter.
+        The page automatically detects all your VolvoConnect devices and displays their current authentication status.
+        Simply click the <strong>"Set authCode"</strong> button next to the desired device to automatically submit the code.
+        The code will be exchanged for access and refresh tokens within seconds.
+    </p>
+    <p>
+        <b>For non-HTTPS setups:</b> If you run FHEM over plain HTTP (no SSL/TLS),
+        Volvo will still redirect with <code>https://...</code>. Simply change the URL in your browser from
+        <code>https://</code> to <code>http://</code> before submitting the code, or modify your browser's
+        redirect handling as needed. The handler page works over both HTTP and HTTPS.
+    </p>
+    <p>
+        <b>Alternative: Manual code extraction (legacy method)</b><br>
+        If you cannot use the built-in handler, configure the redirect URI as:
     </p>
     <code>http://localhost/?code=AUTH_CODE_EXAMPLE&amp;state=fhemstate</code>
     <p>
@@ -2657,17 +2678,23 @@ sub VolvoConnect_Reschedule($$) {
     <ul>
         <code>define &lt;name&gt; VolvoConnect</code><br>
         After defining the device, set all required attributes to the values from the Developer
-        Portal and start the login from the link shown next to the status icon. Copy the
-        authorization code from the redirect URL and use
-        <code>set &lt;name&gt; authCode &lt;code&gt;</code>.
+        Portal and start the login from the link shown next to the status icon.
         Example:
         <pre>define Volvo1 VolvoConnect
     attr Volvo1 vin YV1EXAMPLEVIN
     attr Volvo1 client_id YOUR_CLIENT_ID
     attr Volvo1 client_secret YOUR_CLIENT_SECRET
     attr Volvo1 vcc_api_key YOUR_VCC_API_KEY
-    attr Volvo1 redirect_uri http://localhost
+    attr Volvo1 redirect_uri https://your-fhem-host/fhem/volvoconnect/
+    attr Volvo1 keycloakService 1
     set Volvo1 reauth</pre>
+        <b>Recommended redirect_uri:</b>
+        <ul>
+            <li><code>https://your-fhem-host/fhem/volvoconnect/</code> — Use FHEM's built-in OAuth handler
+                (recommended). Replace <code>your-fhem-host</code> with your FHEM hostname/domain.</li>
+            <li>Supported schemes: <code>https://</code> (strongly recommended) or <code>http://</code> for local testing.</li>
+            <li>Must end with a <strong>trailing slash</strong> and match exactly in the Developer Portal.</li>
+        </ul>
     </ul>
     <br>
     <a name="VolvoConnectset"></a>
@@ -2795,7 +2822,29 @@ sub VolvoConnect_Reschedule($$) {
         Das Modul verwendet OAuth2 Authorization Code mit PKCE. Mit <code>set Volvo1 reauth</code>
         werden gespeicherte Tokens gelöscht. Anschließend den Login-Link neben dem Gerätestatus
         anklicken, um die Volvo-Anmeldung mit den konfigurierten Scopes zu öffnen. Nach der
-        Anmeldung leitet Volvo den Browser zur Redirect-URI zurück, zum Beispiel:
+        Anmeldung leitet Volvo den Browser zur Redirect-URI zurück.
+    </p>
+    <p>
+        <b>Empfohlen: Automatische Code-Übergabe mit dem integrierten Handler</b><br>
+        Redirect-URI im Developer Portal auf FHEM's OAuth-Callback-Handler einstellen:
+    </p>
+    <code>https://your-fhem-host/fhem/volvoconnect/</code>
+    <p>
+        Nach erfolgreichem Volvo-Login leitet Volvo den Browser auf diese URL mit dem
+        Autorisierungscode als URL-Parameter. Die Seite zeigt automatisch alle VolvoConnect-Geräte
+        mit ihrem aktuellen Auth-Status an. Einfach auf den <strong>"Set authCode"</strong>-Button
+        neben dem gewünschten Gerät klicken, um den Code automatisch zu übermitteln.
+        Der Code wird innerhalb weniger Sekunden gegen Access- und Refresh-Token ausgetauscht.
+    </p>
+    <p>
+        <b>Für FHEM ohne HTTPS:</b> Wenn FHEM nur über HTTP erreichbar ist, leitet Volvo trotzdem
+        mit <code>https://...</code> weiter. Einfach die URL in der Adressleiste von
+        <code>https://</code> zu <code>http://</code> ändern, bevor der Code eingegeben wird.
+        Die Handler-Seite funktioniert über beide Protokolle.
+    </p>
+    <p>
+        <b>Alternative: Manuelle Code-Extraktion (altes Verfahren)</b><br>
+        Falls der integrierte Handler nicht genutzt werden kann, Redirect-URI als:
     </p>
     <code>http://localhost/?code=AUTH_CODE_BEISPIEL&amp;state=fhemstate</code>
     <p>
@@ -2803,16 +2852,7 @@ sub VolvoConnect_Reschedule($$) {
         <code>&amp;</code> kopiert. <code>state</code> und die komplette URL werden nicht
         übernommen. Der Code wird anschließend in FHEM eingegeben:
     </p>
-    <pre>define Volvo1 VolvoConnect
-attr Volvo1 vin YV1EXAMPLEVIN
-attr Volvo1 client_id DEINE_CLIENT_ID
-attr Volvo1 client_secret DEIN_CLIENT_SECRET
-attr Volvo1 vcc_api_key DEIN_VCC_API_KEY
-attr Volvo1 redirect_uri http://localhost
-set Volvo1 reauth
-
-# Nach dem Volvo-Login, Beispiel:
-set Volvo1 authCode AUTH_CODE_BEISPIEL</pre>
+    <code>set Volvo1 authCode AUTH_CODE_BEISPIEL</code>
     <p>
         FHEM tauscht den kurzlebigen Autorisierungscode am Endpoint
         <code>https://volvoid.eu.volvocars.com/as/token.oauth2</code> gegen Access- und
@@ -2828,24 +2868,31 @@ set Volvo1 authCode AUTH_CODE_BEISPIEL</pre>
         HTTPS-Reverse-Proxy erreichbar gemacht werden. Eine normale HTTP-Adresse im LAN genügt
         nicht, wenn Volvo für öffentliche Redirect-URIs HTTPS voraussetzt.
     </p>
-    <p>
-        Dynamische Endpunkte verwenden <code>interval</code> (Standard 300 Sekunden), langsamere
-        Diagnose- und Reifendaten <code>interval_slow</code> (Standard 1800 Sekunden) und der
-        Standort <code>interval_location</code> (Standard 900 Sekunden). Fähigkeiten, Befehlsliste
-        und Fahrzeugdetails werden einmal je VIN geladen; erfolgreiche Abrufzeitpunkte bleiben
-        über Neustarts erhalten. <code>set &lt;name&gt; update</code> erzwingt den Abruf aller
-        aktivierten Endpunkte. Das eigenständige Dashboard aktualisiert sich mit <code>interval</code>;
-        während der Layout-Bearbeitung ist der Refresh pausiert. Fahrzeugbefehle werden nur gesendet,
-        wenn der zugehörige Befehls-Scope aktiviert ist.
-    </p>
     <br>
     <a name="VolvoConnectdefine"></a>
     <b>Define</b>
     <ul>
         <code>define &lt;name&gt; VolvoConnect</code><br>
         Nach dem Anlegen alle erforderlichen Attribute mit den Werten aus dem Developer Portal
-        setzen. Danach den Login-Link neben dem Status-Punkt öffnen, den Code aus der Rücksprung-
-        URL kopieren und mit <code>set &lt;name&gt; authCode &lt;code&gt;</code> übergeben.
+        setzen und den Login-Link neben dem Status-Punkt öffnen.
+        Beispiel:
+        <pre>define Volvo1 VolvoConnect
+    attr Volvo1 vin YV1EXAMPLEVIN
+    attr Volvo1 client_id DEINE_CLIENT_ID
+    attr Volvo1 client_secret DEIN_CLIENT_SECRET
+    attr Volvo1 vcc_api_key DEIN_VCC_API_KEY
+    attr Volvo1 redirect_uri https://your-fhem-host/fhem/volvoconnect/
+    attr Volvo1 keycloakService 1
+    set Volvo1 reauth</pre>
+        <b>Empfohlene redirect_uri:</b>
+        <ul>
+            <li><code>https://your-fhem-host/fhem/volvoconnect/</code> — Verwendet FHEMs integrierten
+                OAuth-Handler (empfohlen). <code>your-fhem-host</code> durch den FHEM-Hostnamen oder
+                die Domain ersetzen.</li>
+            <li>Unterstützte Protokolle: <code>https://</code> (empfohlen) oder <code>http://</code> für lokale Tests.</li>
+            <li>Muss mit einem <strong>Schrägstrich am Ende</strong> enden und muss im Developer Portal exakt
+                übereinstimmen.</li>
+        </ul>
     </ul>
     <br>
     <a name="VolvoConnectset"></a>
