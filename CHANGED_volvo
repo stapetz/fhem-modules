@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-08 a64de72 docs(volvoconnect): highlight new
+  redirect_uri in Developer Portal section
+  Add explicit mention of new redirect_uri in Volvo Developer Portal setup
+    steps
+  Mark https://your-fhem-host/fhem/volvoconnect/ as recommended (November 2026)
+  Note that this is the new interactive device selector handler
+  Update both English and German documentation sections
 - documentation: 2026-11-08 87095dd docs(volvoconnect): update OAuth workflow
   documentation with new handler URL
   Document recommended redirect_uri: https://your-fhem-host/fhem/volvoconnect/
