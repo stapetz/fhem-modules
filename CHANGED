@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-08 9acb4c2 style(volvo): align OAuth handler page with
+  dashboard theme and header
 - documentation: 2026-11-08 a64de72 docs(volvoconnect): highlight new
   redirect_uri in Developer Portal section [VolvoConnect]
   Add explicit mention of new redirect_uri in Volvo Developer Portal setup
