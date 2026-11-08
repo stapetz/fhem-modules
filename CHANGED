@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 2c9f3bc fix(update): correct file sizes in
+  controls_volvo.txt
+  index.html: 3297 bytes (was 3657)
+  Update timestamps to current
 - change: 2026-11-08 b906248 refactor(oauth-handler): simplify to basic working
   HTML
   Remove .htaccess (not needed - FHEM already serves text/html)
