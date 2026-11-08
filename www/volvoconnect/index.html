@@ -133,7 +133,7 @@
         }
 
         function loadDevices() {
-            fetch('/fhem?cmd=list%20TYPE%3DVolvoConnect&XHR=1')
+            fetch('/fhem?cmd=list%20TYPE=VolvoConnect&XHR=1')
                 .then(response => response.text())
                 .then(data => {
                     console.log('Raw response from FHEM:', data);
@@ -141,18 +141,14 @@
                     var lines = data.trim().split('\n');
                     
                     console.log('Number of lines:', lines.length);
-                    console.log('First line:', lines[0]);
                     
                     lines.forEach((line, index) => {
+                        line = line.trim();
                         console.log('Line ' + index + ':', line);
-                        // Look for lines containing "TYPE=VolvoConnect" and extract device name
-                        if (line.includes('TYPE=VolvoConnect') || line.includes('TYPE') && line.includes('VolvoConnect')) {
-                            // Device name is typically at the start before the first space
-                            var deviceName = line.split(/\s+/)[0];
-                            if (deviceName && deviceName.length > 0 && !devices.includes(deviceName)) {
-                                devices.push(deviceName);
-                                console.log('Found device:', deviceName);
-                            }
+                        // Each line is a device name if it's not empty
+                        if (line.length > 0) {
+                            devices.push(line);
+                            console.log('Found device:', line);
                         }
                     });
                     
