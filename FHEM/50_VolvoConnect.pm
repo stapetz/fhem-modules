@@ -3,7 +3,7 @@ package main;
 use strict;
 use warnings;
 
-our $VolvoConnect_VERSION = '1.1.0-dev';
+our $VolvoConnect_VERSION = '1.1.0';
 use utf8;
 use HttpUtils;
 use JSON;
