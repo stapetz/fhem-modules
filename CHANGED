@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-08 3395f79 chore(volvoconnect): bump version to 1.1.0 for
+  main release [VolvoConnect]
+  Update VERSION from 1.1.0-dev to 1.1.0 to mark the official release
+  with OAuth handler page and automatic code submission feature.
 - feature: 2026-11-08 c8e31ee feat(volvoconnect): add OAuth handler page with
   automatic code submission
   Add interactive device selector showing all VolvoConnect devices
