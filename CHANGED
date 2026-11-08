@@ -2,6 +2,10 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-08 b89382f fix(oauth-handler): add version comment to trigger
+  update
+  Add version comment to index.html to force FHEM update detection.
+  Change file size from 10338 to 10392 bytes so FHEM recognizes update.
 - bugfix: 2026-11-08 0130e86 fix(oauth-handler): simplify HTML and remove
   problematic gradients
   Remove linear-gradient styling (was causing blank page)
