@@ -2,6 +2,9 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-10 6abc4ca Fix VolvoConnect scope config persistence
+  [VolvoConnect]
+- change: 2026-11-10 20d7c57 Initial plan
 - bugfix: 2026-11-10 665cde5 Fix VolvoConnect dashboard URL path encoding
   [VolvoConnect]
 - change: 2026-11-10 2edbd5e Initial plan
