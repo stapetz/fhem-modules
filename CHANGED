@@ -2,6 +2,9 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-10 04f2357 Fix empty Volvo command request bodies
+  [VolvoConnect]
+- change: 2026-11-10 c35b94e Initial plan
 - change: 2026-11-08 3395f79 chore(volvoconnect): bump version to 1.1.0 for
   main release [VolvoConnect]
   Update VERSION from 1.1.0-dev to 1.1.0 to mark the official release
