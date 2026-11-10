@@ -1690,23 +1690,23 @@ sub VolvoConnect_SendCommand($$$;$) {
     # Command-specific URL and payload
     if ($command eq "horn") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/honk";
-        $payload = "";
+        $payload = "{}";
     }
     elsif ($command eq "lock") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/lock";
-        $payload = "";
+        $payload = "{}";
     }
     elsif ($command eq "unlock") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/unlock";
-        $payload = "";
+        $payload = "{}";
     }
     elsif ($command eq "climate") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/climatization-start";
-        $payload = "";
+        $payload = "{}";
     }
     elsif ($command eq "climate_stop") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/climatization-stop";
-        $payload = "";
+        $payload = "{}";
     }
     elsif ($command eq "charge_start") {
         $url = "https://api.volvocars.com/connected-vehicle/v2/vehicles/$vin/commands/charging-start";
