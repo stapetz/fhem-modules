@@ -976,11 +976,19 @@ sub VolvoConnect_HtmlEscape($) {
     return $s;
 }
 
+sub VolvoConnect_EncodePathSegment($) {
+    my ($name) = @_;
+    my $encoded = urlEncode($name);
+    $encoded =~ s/%(2d|2e|5f|7e)/chr(hex($1))/egi;
+    return $encoded;
+}
+
 sub VolvoConnect_CGI($) {
     my ($request) = @_;
     my ($path) = split(/\?/, $request, 2);
     my @parts = split("/", $path);
     my $name = $parts[-1];
+    $name =~ s/%([0-9a-f]{2})/chr(hex($1))/egi;
 
     my $hash = $defs{$name};
     return ("text/plain; charset=utf-8", "Unknown VolvoConnect device: $name")
@@ -1592,7 +1600,7 @@ sub VolvoConnect_Get($$@) {
     if ($cmd eq "_dashboardEmbedURL") {
         my $path = defined($main::FW_ME) && $main::FW_ME ne "" ? $main::FW_ME : "/fhem";
         $path =~ s{/$}{};
-        return $path . "/VolvoConnect/" . urlEncode($name) . "?embed=1";
+        return $path . "/VolvoConnect/" . VolvoConnect_EncodePathSegment($name) . "?embed=1";
     }
 
     if ($cmd eq "_dashboardURL") {
@@ -1610,7 +1618,7 @@ sub VolvoConnect_Get($$@) {
             my $port = $webHash && defined($webHash->{PORT}) ? $webHash->{PORT} : undef;
             $host = "localhost" . (defined($port) && $port ne "" ? ":$port" : "");
         }
-        return $scheme . "://" . $host . $fhemPath . "/VolvoConnect/" . urlEncode($name);
+        return $scheme . "://" . $host . $fhemPath . "/VolvoConnect/" . VolvoConnect_EncodePathSegment($name);
     }
 
     if ($cmd eq "summary") {
