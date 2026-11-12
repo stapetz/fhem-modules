@@ -2,6 +2,15 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-10 53d2c28 Fix VolvoConnect scope config persistence
+  [VolvoConnect]
+  (cherry picked from commit 6abc4ca7c8c01960381fa69bc8bf1fa8847587e5)
+- bugfix: 2026-11-10 95760ee Fix VolvoConnect dashboard URL path encoding
+  [VolvoConnect]
+  (cherry picked from commit 665cde5d7055ba864e2fd9cc0083e82eef428612)
+- bugfix: 2026-11-10 4470270 Fix empty Volvo command request bodies
+  [VolvoConnect]
+  (cherry picked from commit 04f23572f43bfba7689462410f0a8ef015bf1859)
 - change: 2026-11-08 9acb4c2 style(volvo): align OAuth handler page with
   dashboard theme and header
 - documentation: 2026-11-08 a64de72 docs(volvoconnect): highlight new
