@@ -2,6 +2,15 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 6e195ff fix(dashboard): clean up embed timer and keydown
+  listener after dialog close
+  After closing the FHEMWEB dialog the fragment's refresh timer and Escape
+  listener kept running and dereferenced the removed .vcc-embed element
+  (TypeError: null is not an object on the plain detail page). document.body
+  substitutions now go through vccRoot(), which returns a detached dummy node
+  and deregisters the global timer and keydown listener once the fragment is
+  gone. The embed auto-refresh also keeps the current fragment on non-OK HTTP
+  responses instead of replacing it with an error page.
 - change: 2026-11-14 4a2e54a Entwicklung VolvoConnect 1.1.2-dev
 - documentation: 2026-11-14 9bef59b docs(volvo): document scoped _showDashboard
   dialog and embed edit=1 parameter
