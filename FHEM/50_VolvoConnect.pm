@@ -3,7 +3,7 @@ package main;
 use strict;
 use warnings;
 
-our $VolvoConnect_VERSION = '1.1.1';
+our $VolvoConnect_VERSION = '1.1.2';
 use utf8;
 use HttpUtils;
 use JSON;
@@ -1586,14 +1586,22 @@ sub VolvoConnect_EmbedFragment {
     my ($content) = $html =~ m{<body>(.*)</body>}s;
     return $html if (!defined($css) || !defined($content));
 
-    $content =~ s/document\.body/document.querySelector('.vcc-embed')/g;
+    $content =~ s/document\.body/vccRoot()/g;
     $content =~ s/window\.location\.reload\(\)/vccEmbedReload()/g;
     $content =~ s/setInterval\(/window.clearInterval(window.__vccTimer);window.__vccTimer=setInterval(/;
     $content =~ s/document\.addEventListener\('keydown',function\(e\)\{/window.__vccKey&&document.removeEventListener('keydown',window.__vccKey);document.addEventListener('keydown',window.__vccKey=function(e){/;
-    my $reload = "function vccEmbedReload(){"
+    # vccRoot() replaces document.body. Once the fragment has been removed from the
+    # host page (e.g. the FHEMWEB dialog was closed) it cleans up the global timer
+    # and keydown listener and returns a detached dummy element, so leftover
+    # callbacks never dereference null.
+    my $reload = "function vccRoot(){var r=document.querySelector('.vcc-embed');if(r)return r;"
+        . "window.clearInterval(window.__vccTimer);"
+        . "if(window.__vccKey){document.removeEventListener('keydown',window.__vccKey);window.__vccKey=null;}"
+        . "return document.createElement('div');}"
+        . "function vccEmbedReload(){"
         . "var root=document.querySelector('.vcc-embed'),wrap=root&&root.querySelector('.wrap[data-device]');if(!wrap)return;"
         . "var url=(wrap.getAttribute('data-fhem-path')||'/fhem')+'/VolvoConnect/'+encodeURIComponent(wrap.getAttribute('data-device'))+'?embed=1'+(wrap.getAttribute('data-editable')==='1'?'&edit=1':'');"
-        . "fetch(url,{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.text();}).then(function(t){"
+        . "fetch(url,{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();}).then(function(t){"
         . "var current=document.querySelector('.vcc-embed');if(!current)return;"
         . "current.replaceWith(document.createRange().createContextualFragment(t));}).catch(function(){});}";
     $content =~ s|<script>|<script>(function(){$reload|g;
