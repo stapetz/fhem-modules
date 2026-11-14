@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-14 a480eb7 docs(volvo): add dashboard screenshot and
+  fhem-cms widget section with wiki link
 - change: 2026-11-14 344aa08 Release VolvoConnect 1.1.2
   Dashboard-Dialog: Timer und Escape-Listener raeumen sich nach dem Schliessen
     selbst auf (kein TypeError mehr auf der Detailseite)
