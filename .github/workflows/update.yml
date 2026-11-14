@@ -99,7 +99,6 @@ jobs:
                       lines.append(file_line)
                       all_lines.append(file_line)
               
-              lines.append(changed_line(f"CHANGED_{key}"))
               Path(controls_name).write_text(
                   "\n".join(lines) + "\n", encoding="ascii"
               )
