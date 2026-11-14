@@ -2,6 +2,11 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-14 344aa08 Release VolvoConnect 1.1.2
+  Dashboard-Dialog: Timer und Escape-Listener raeumen sich nach dem Schliessen
+    selbst auf (kein TypeError mehr auf der Detailseite)
+  Embed-Auto-Refresh behaelt das Dashboard bei HTTP-Fehlerantworten statt es
+    durch die Fehlerseite zu ersetzen
 - change: 2026-11-14 252fd56 Release VolvoConnect 1.1.1
   Dashboard-Dialog (_showDashboard) als gekapseltes Fragment wie
     _showEntityConfig: FHEMWEB-Theme kollidiert nicht mehr mit dem
