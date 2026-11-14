@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 9840aeb fix(dashboard): force correct tile accent colors
+  in FHEM modal [VolvoConnect]
+  Added !important to CSS custom properties (--tile-accent) to override FHEM
+    cascade
+  Added !important to border-top and h2 color properties
+  Added universal box-sizing reset for .wrap and all children
+  This ensures correct green/orange/blue tile accent colors display in both
+    standalone and modal views
 - bugfix: 2026-11-14 6d41a57 fix(dashboard): make dashboard responsive in FHEM
   modal dialogs [VolvoConnect]
   Changed .wrap from fixed max-width to flexbox layout (flex-direction:column)
