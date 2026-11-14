@@ -2,6 +2,12 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 31d692d fix(dashboard): replace CSS-columns with
+  responsive CSS-Grid layout
+  Replace column-width layout with grid-template-columns auto-fit
+  Grid now properly adapts to available width in FHEM dialogs
+  Minimum tile width 280px, max fills available space
+  Fixes layout issues in narrow containers and edit mode
 - bugfix: 2026-11-14 6c8029e fix(dashboard): remove restrictive media queries
   for FHEM dialog display
   Remove @media(max-width:760px) and @media(max-width:500px) breakpoints
