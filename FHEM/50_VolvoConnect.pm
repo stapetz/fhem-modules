@@ -995,7 +995,8 @@ sub VolvoConnect_CGI($) {
         if (!$hash || $hash->{TYPE} ne "VolvoConnect");
 
     my $embed = $request =~ /[?&]embed=1(?:&|$)/ ? 1 : 0;
-    my $html = eval { VolvoConnect_BuildDashboard({hash => $hash, editable => 0, embed => $embed}) };
+    my $edit = $embed && $request =~ /[?&]edit=1(?:&|$)/ ? 1 : 0;
+    my $html = eval { VolvoConnect_BuildDashboard({hash => $hash, editable => $edit, embed => $embed}) };
     if ($@ || !defined($html)) {
         Log3 $name, 2, "VolvoConnect ($name) - Dashboard rendering failed: $@";
         return ("text/plain; charset=utf-8", "Dashboard-Fehler: $@");
@@ -1065,6 +1066,7 @@ sub VolvoConnect_BuildDashboard {
         . "<title>$name Dashboard</title>"
         . "<style>"
         . "*{box-sizing:border-box;}"
+        . "input,button{font:inherit;box-shadow:none;border-radius:0;text-shadow:none;background-image:none;}"
         . "body{font-family:'Avenir Next','Helvetica Neue',sans-serif;background:#151f1b;color:#f4f4e9;margin:0;padding:12px;overflow-x:hidden;font-size:14px;line-height:1.4;}"
         . "h1{font:500 22px Georgia,serif;margin:3px 0;letter-spacing:0;line-height:1.1;}"
         . ".wrap{width:100%;max-width:1120px;margin:0 auto;padding-bottom:0;background:#1d2825;border:1px solid #46544c;box-shadow:0 16px 44px #0c16124a;overflow:hidden;}"
@@ -1144,14 +1146,15 @@ sub VolvoConnect_BuildDashboard {
         . "body.edit-mode .save-btn{display:inline-block;}"
         . "</style></head><body><div class='wrap' data-device='" . VolvoConnect_HtmlEscape($name)
         . "' data-fhem-path='" . VolvoConnect_HtmlEscape($fhemPath)
+        . "' data-editable='" . ($options->{editable} ? "1" : "0")
         . "' data-csrf='$csrf'>"
         . "<div class='toolbar'><div class='brand'><span class='brand-mark' aria-hidden='true'><svg viewBox='0 0 24 24'><path d='M3 14.5 4.5 9h15l1.5 5.5V19h-2v-2H5v2H3z'/><path d='M5 9l2-4h10l2 4M3 13h18'/><circle cx='7' cy='14' r='1'/><circle cx='17' cy='14' r='1'/></svg></span><div><small>VOLVO CONNECT / FAHRZEUG</small><h1>$name</h1></div></div>"
         . "<div class='toolbar-controls'>"
         . ($options->{editable}
-            ? "<button type='button' class='btn icon-btn' title='Bearbeiten' aria-label='Bearbeiten' onclick='toggleEdit()'>&#9998;</button>"
+            ? "<button type='button' class='btn icon-btn' title='Bearbeiten' aria-label='Bearbeiten'>&#9998;</button>"
             : "")
         . ($options->{editable}
-            ? "<button type='button' class='btn save-btn' onclick='saveDashboardConfig()'>&#128190; Speichern</button>"
+            ? "<button type='button' class='btn save-btn'>&#128190; Speichern</button>"
             : "")
         . "</div><span class='auth-indicator' role='img' aria-label='" . VolvoConnect_HtmlEscape($authStatusTitle)
         . "' title='" . VolvoConnect_HtmlEscape($authStatusTitle) . "'><span class='auth-dot "
@@ -1320,7 +1323,7 @@ sub VolvoConnect_BuildDashboard {
             . "<span class='tile-edit-controls'><label>anzeigen <input type='checkbox' class='tile-vis-toggle'"
             . ($tileVisible ? " checked" : "") . "></label></span>"
             . ($options->{editable}
-                ? "<button type='button' class='tile-move-toggle' aria-label='Kacheln verschieben' aria-pressed='false' title='Kacheln verschieben' onclick='toggleTileReorderMode()'><span aria-hidden='true'>&#8598;&#8599;<br>&#8601;&#8600;</span></button>"
+                ? "<button type='button' class='tile-move-toggle' aria-label='Kacheln verschieben' aria-pressed='false' title='Kacheln verschieben'><span aria-hidden='true'>&#8598;&#8599;<br>&#8601;&#8600;</span></button>"
                 : "")
             . "</h2>";
         for my $entity (@ordered) {
@@ -1514,8 +1517,8 @@ sub VolvoConnect_BuildDashboard {
         . "  });"
         . "  var json = asciiSafeJson(config);"
         . "  var b64 = btoa(json);"
-        . "  var url = '/fhem?XHR=1';"
-        . "  fetch(url, {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cmd=set%20" . urlEncode($name) . "%20saveDashboardConfig%20' + encodeURIComponent(b64)}).then(function(response){"
+        . "  var url = ((dashboard&&dashboard.getAttribute('data-fhem-path'))||'/fhem')+'?XHR=1';"
+        . "  fetch(url, {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cmd=set%20" . urlEncode($name) . "%20saveDashboardConfig%20' + encodeURIComponent(b64)+(csrf?'&fwcsrf='+encodeURIComponent(csrf):'')}).then(function(response){"
         . "    if(!response.ok) throw new Error('Speichern fehlgeschlagen: HTTP ' + response.status);"
         . "    document.querySelectorAll('.tile[data-prefix]').forEach(function(tile){"
         . "      var visibility = tile.querySelector('.tile-vis-toggle');"
@@ -1526,6 +1529,13 @@ sub VolvoConnect_BuildDashboard {
         . "    document.querySelectorAll('.key-input').forEach(function(el){ el.readOnly = true; });"
         . "  }).catch(function(error){ window.alert(error.message); });"
         . "}"
+        # Buttons are wired up via listeners (no inline onclick) so the code also works
+        # inside the scoped embed fragment, where functions are not global (see _showEntityConfig).
+        . "var vccEditBtn=dashboard&&dashboard.querySelector('.icon-btn');"
+        . "if(vccEditBtn)vccEditBtn.addEventListener('click',function(){toggleEdit();});"
+        . "var vccSaveBtn=dashboard&&dashboard.querySelector('.save-btn');"
+        . "if(vccSaveBtn)vccSaveBtn.addEventListener('click',function(){saveDashboardConfig();});"
+        . "document.querySelectorAll('.tile-move-toggle').forEach(function(button){button.addEventListener('click',function(){toggleTileReorderMode();});});"
         . "</script>";
 
     $html .= "</body></html>";
@@ -1582,7 +1592,7 @@ sub VolvoConnect_EmbedFragment {
     $content =~ s/document\.addEventListener\('keydown',function\(e\)\{/window.__vccKey&&document.removeEventListener('keydown',window.__vccKey);document.addEventListener('keydown',window.__vccKey=function(e){/;
     my $reload = "function vccEmbedReload(){"
         . "var root=document.querySelector('.vcc-embed'),wrap=root&&root.querySelector('.wrap[data-device]');if(!wrap)return;"
-        . "var url=(wrap.getAttribute('data-fhem-path')||'/fhem')+'/VolvoConnect/'+encodeURIComponent(wrap.getAttribute('data-device'))+'?embed=1';"
+        . "var url=(wrap.getAttribute('data-fhem-path')||'/fhem')+'/VolvoConnect/'+encodeURIComponent(wrap.getAttribute('data-device'))+'?embed=1'+(wrap.getAttribute('data-editable')==='1'?'&edit=1':'');"
         . "fetch(url,{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.text();}).then(function(t){"
         . "var current=document.querySelector('.vcc-embed');if(!current)return;"
         . "current.replaceWith(document.createRange().createContextualFragment(t));}).catch(function(){});}";
