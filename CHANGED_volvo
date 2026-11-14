@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 96ae3f5 fix(dashboard): use POST instead of GET for saving
+  dashboard config
+  The dashboard config Base64 string can be very long and exceeded the
+  maximum URL length, causing 'Load failed' errors. Switch to POST request
+  with the config in the request body instead of the URL.
+  Change fetch() from GET URL to POST with body
+  Pass Base64 string as request body parameter
+  Add HTTP status code to error message for better debugging
 - bugfix: 2026-11-14 31d692d fix(dashboard): replace CSS-columns with
   responsive CSS-Grid layout
   Replace column-width layout with grid-template-columns auto-fit

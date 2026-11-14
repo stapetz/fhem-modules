@@ -1,4 +1,3 @@
-UPD 2026-11-14_20:50:25 155879 FHEM/50_VolvoConnect.pm
+UPD 2026-11-14_20:56:29 156004 FHEM/50_VolvoConnect.pm
 UPD 2026-11-08_18:48:34 14029 www/volvoconnect/index.html
 UPD 2026-11-08_14:49:58 3443 www/volvoconnect/README.md
-UPD 2026-11-14_19:50:32 8950 CHANGED_volvo
