@@ -2,6 +2,8 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-14 f687dfe docs(volvo): FHEMWiki-Vorlage: Version
+  1.1.2 in Infobox und Einleitung, fhem-cms-Hinweis mit Links [VolvoConnect]
 - documentation: 2026-11-14 1bbefd2 docs(volvo): link native CMS widget and
   installation guidance [VolvoConnect]
   Refs stapetz/fhem-cms#209
