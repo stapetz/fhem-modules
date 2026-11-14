@@ -31,6 +31,33 @@ Für eine neue Installation sollte sie vollständig gelesen werden.
   beim Aufruf über `get <name> _showDashboard`; die isolierte Dashboard-URL ist
   nicht editierbar
 
+## Dashboard
+
+Das modul-eigene Dashboard gruppiert alle verfügbaren Readings in Kacheln und
+bietet die unterstützten Fahrzeugaktionen direkt an:
+
+![VolvoConnect-Dashboard des Moduls](images/volvoconnect-dashboard.png)
+
+## Darstellung im fhem-cms
+
+Wer seine FHEM-Oberfläche mit [fhem-cms](https://github.com/stapetz/fhem-cms)
+gestaltet, kann die VolvoConnect-Daten mit dem dort enthaltenen
+**VolvoConnect-Widget** darstellen – dokumentiert im
+[fhem-cms-Wiki (VolvoConnect-Widget)](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget).
+Das Widget baut direkt auf diesem Modul auf und bietet gegenüber der
+Rohansicht einige Vorzüge:
+
+- Readingnamen, Einheiten und Gruppen des Modul-Dashboards werden automatisch
+  übernommen; ein manuelles Mapping ist nicht erforderlich.
+- Kompakte Hauptkachel mit Akkustand und Restreichweite; die vollständige
+  Fahrzeugansicht öffnet sich als Popup.
+- Einzelne Readings lassen sich ein-/ausblenden, Reihenfolge und Sichtbarkeit
+  werden im CMS gespeichert – die Readings im Modul bleiben unverändert.
+- Bildergalerie mit Außen- und Innenansicht des Fahrzeugs sowie
+  Verbindungsstatus-Anzeige, eingebettet in das Design der CMS-Seite.
+
+![VolvoConnect-Widget im fhem-cms](images/volvoconnect-fhem-cms.png)
+
 ## Schnellstart
 
 > Der Schnellstart ist eine Kurzfassung. Die Redirect-URI, die Volvo-Berechtigungen und
