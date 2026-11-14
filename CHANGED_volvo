@@ -2,6 +2,15 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 6d41a57 fix(dashboard): make dashboard responsive in FHEM
+  modal dialogs
+  Changed .wrap from fixed max-width to flexbox layout (flex-direction:column)
+  Reduced grid minmax from 280px to 250px for better responsiveness in narrow
+    containers
+  Added flex:1 and overflow-y:auto to .grid for proper scrolling in modal
+  Added flex:0 0 auto to .toolbar to prevent it from shrinking
+  This allows the dashboard to adapt to FHEM modal width while maintaining
+    proper tile layout and drag functionality
 - bugfix: 2026-11-14 96ae3f5 fix(dashboard): use POST instead of GET for saving
   dashboard config
   The dashboard config Base64 string can be very long and exceeded the
