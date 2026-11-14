@@ -2,6 +2,9 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- documentation: 2026-11-14 1bbefd2 docs(volvo): link native CMS widget and
+  installation guidance
+  Refs stapetz/fhem-cms#209
 - documentation: 2026-11-14 9d5e5df docs(volvo): add dashboard screenshot and
   fhem-cms widget section with wiki link
 - change: 2026-11-14 759d52a Entwicklung VolvoConnect 1.1.3-dev
