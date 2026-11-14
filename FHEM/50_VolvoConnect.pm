@@ -1067,17 +1067,17 @@ sub VolvoConnect_BuildDashboard {
         . "*{box-sizing:border-box;}"
         . "body{font-family:'Avenir Next','Helvetica Neue',sans-serif;background:#151f1b;color:#f4f4e9;margin:0;padding:12px;overflow-x:hidden;font-size:14px;line-height:1.4;}"
         . "h1{font:500 22px Georgia,serif;margin:3px 0;letter-spacing:0;line-height:1.1;}"
-        . ".wrap,.wrap *{box-sizing:border-box;}"
-        . ".wrap{display:flex;flex-direction:column;width:100%;margin:0 auto;padding-bottom:0;background:#1d2825;border:1px solid #46544c;box-shadow:0 16px 44px #0c16124a;overflow:hidden;}"
-        . ".toolbar{flex:0 0 auto;min-height:76px;padding:0 24px;background:#202e29;border-bottom:1px solid #405149;display:flex;align-items:center;gap:12px;}"
+        . ".wrap{width:100%;max-width:1120px;margin:0 auto;padding-bottom:0;background:#1d2825;border:1px solid #46544c;box-shadow:0 16px 44px #0c16124a;overflow:hidden;}"
+        . ".toolbar{min-height:76px;padding:0 24px;background:#202e29;border-bottom:1px solid #405149;display:flex;align-items:center;gap:12px;}"
         . ".brand{display:flex;align-items:center;gap:12px;margin-right:auto;min-width:0;}"
         . ".brand-mark{width:39px;height:39px;flex:0 0 39px;border:2px solid #52bd8b;border-radius:50%;color:#52bd8b;display:grid;place-items:center;}"
         . ".brand-mark svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}"
         . ".brand small{font:700 10px 'Helvetica Neue',sans-serif;letter-spacing:1.2px;color:#a9b7ac;}"
         . ".toolbar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}"
-        . ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;padding:22px 24px 24px;background:linear-gradient(155deg,#26352e,#1b2823 62%,#202c27);flex:1;overflow-y:auto;}"
-        . ".tile{background:#26342d;padding:14px 15px;width:100%;min-width:0;break-inside:avoid;border-top:2px solid;}"
-        . ".tile h2{font:500 17px Georgia,serif;margin:0 0 8px;border-bottom:1px solid #46534a;padding-bottom:9px;display:flex;align-items:center;gap:8px;}"
+        . ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;padding:22px 24px 24px;background:linear-gradient(155deg,#26352e,#1b2823 62%,#202c27);}"
+        . ".tile{--tile-accent:#52bd8b;background:#26342d;border-top:2px solid var(--tile-accent);padding:14px 15px;width:100%;min-width:0;break-inside:avoid;}"
+        . ".tile:nth-child(3n){--tile-accent:#e3b953;} .tile:nth-child(3n+2){--tile-accent:#8ab6d1;}"
+        . ".tile h2{font:500 17px Georgia,serif;margin:0 0 8px;color:var(--tile-accent);border-bottom:1px solid #46534a;padding-bottom:9px;display:flex;align-items:center;gap:8px;}"
         . ".tile.tile-hidden{display:none;}"
         . "body.edit-mode .tile.tile-hidden{display:block;opacity:.55;outline:1px dashed #69796f;}"
         . ".tile-edit-controls{display:none;margin-left:auto;align-items:center;gap:4px;color:#a9b7ac;font:normal 10px 'Helvetica Neue',sans-serif;}"
@@ -1186,7 +1186,6 @@ sub VolvoConnect_BuildDashboard {
         } @prefixes;
     }
 
-    my $tileIndex = 0;
     for my $prefix (@prefixes) {
         my $attrName = $scopeAttr{$prefix};
         if ($prefix eq "engineDiagnostics") {
@@ -1316,8 +1315,7 @@ sub VolvoConnect_BuildDashboard {
         } @entities;
 
         my $tileVisible = !exists($tileVisibility->{$prefix}) || $tileVisibility->{$prefix};
-        my $accentColor = ($tileIndex % 3 == 0) ? "#52bd8b" : ($tileIndex % 3 == 1) ? "#8ab6d1" : "#e3b953";
-        $html .= "<div class='tile" . ($tileVisible ? "" : " tile-hidden") . "' data-prefix='$prefix' style='border-top-color:$accentColor!important'><h2 style='color:$accentColor!important'>"
+        $html .= "<div class='tile" . ($tileVisible ? "" : " tile-hidden") . "' data-prefix='$prefix'><h2>"
             . VolvoConnect_HtmlEscape($labels{$prefix} // $prefix)
             . "<span class='tile-edit-controls'><label>anzeigen <input type='checkbox' class='tile-vis-toggle'"
             . ($tileVisible ? " checked" : "") . "></label></span>"
@@ -1363,7 +1361,6 @@ sub VolvoConnect_BuildDashboard {
                 . "<a class='location-attr' target='_blank' rel='noopener' href='https://www.openstreetmap.org/?mlat=$latitude&amp;mlon=$longitude#map=$zoom/$latitude/$longitude'>&copy; OpenStreetMap</a></div>";
         }
         $html .= "</div>";
-        $tileIndex++;
     }
 
     my @vehicleImages = (
@@ -1657,7 +1654,9 @@ sub VolvoConnect_Get($$@) {
     }
 
     if ($cmd eq "_showDashboard") {
-        return VolvoConnect_BuildDashboard({hash => $hash, editable => 1});
+        # Deliver the dashboard as a scoped fragment (like _showEntityConfig) so its
+        # CSS does not clash with the FHEMWEB stylesheet inside the dialog.
+        return VolvoConnect_BuildDashboard({hash => $hash, editable => 1, embed => 1});
     }
 
     if ($cmd eq "_showEntityConfig") {
