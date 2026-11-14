@@ -316,6 +316,8 @@ Vor sicherheitsrelevanten Befehlen wie `lock`, `unlock`, `horn` oder Klimatisier
 
 ## 9. Dashboard
 
+![VolvoConnect-Dashboard des Moduls](images/volvoconnect-dashboard.png)
+
 - `get <name> _dashboardURL` liefert die vollständige Dashboard-URL; alternativ ist es unter `<FHEM-URL>/VolvoConnect/<name>` erreichbar.
 - `get <name> _showDashboard` gibt das Dashboard direkt in FHEM aus. Seit
   1.1.1 wird es dabei wie `_showEntityConfig` als gekapseltes Fragment mit
@@ -344,6 +346,11 @@ Layout-Konfiguration dieses Geräts auf Standard zurückzusetzen:
 ```
 
 Das setzt Reihenfolge, Sichtbarkeit und individuelle Labels zurück, aber keine Tokens oder Device-Attribute.
+
+Für Oberflächen auf Basis von [fhem-cms](https://github.com/stapetz/fhem-cms) steht dort ein
+eigenes VolvoConnect-Widget bereit, das die Daten dieses Moduls automatisch übernimmt; siehe
+[fhem-cms-Wiki: VolvoConnect-Widget](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget)
+und der Abschnitt „Darstellung im fhem-cms" in der [README](README.md).
 
 ## Einbettung in FTUI
 
