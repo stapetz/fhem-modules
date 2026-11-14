@@ -292,6 +292,19 @@ Das Dashboard gruppiert Messwerte und Zustände in Kacheln und bietet unterstüt
 
 Die Adresse liegt unter deinem FHEMWEB-Pfad, beispielsweise <code>/fhem/VolvoConnect/Volvo1</code>. Verwende bevorzugt den vom Modul gelieferten Link.
 
+=== Natives Fahrzeugwidget in fhem-cms ===
+
+Für [[Fhem-cms|fhem-cms]] steht ein eigenes VolvoConnect-Widget zur Verfügung. '''Es funktioniert ausschließlich zusammen mit dem VolvoConnect-Modul aus [https://github.com/stapetz/fhem-modules/tree/main/docs/volvo stapetz/fhem-modules] in derselben FHEM-Installation.''' Das Widget ersetzt weder das Modul noch die Volvo-Anmeldung und ist keine eigenständige API-Anbindung.
+
+Nach der [https://github.com/stapetz/fhem-modules/blob/main/docs/volvo/DOKUMENTATION.md Modulinstallation und Einrichtung] im CMS ein Widget vom Typ '''VolvoConnect''' hinzufügen und das eingerichtete Device auswählen. Readings und Gruppen werden automatisch zugeordnet.
+
+* Kompaktansicht mit Akkustand, Restreichweite und Verbindungsstatus; das Informationssymbol öffnet die Fahrzeugdetails.
+* Alternativ alle Detailkarten direkt im Widget anzeigen; Fahrzeugaktionen sind über das Aktionssymbol erreichbar.
+* Im CMS-Editor Karten verschieben, skalieren, ein-/ausblenden und automatisch anordnen. Das CMS-Layout wird unabhängig vom Modul-Dashboard gespeichert.
+* Die [https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget GitHub-Wiki-Anleitung mit Screenshots] beschreibt beide Ansichten, die Modulinstallation und die Bedienung.
+
+Das eigenständige Dashboard dieses Moduls bleibt auch ohne fhem-cms nutzbar. Es ist nicht identisch mit dem nativen CMS-Widget.
+
 === Einbettung in andere Oberflächen ===
 
 Die relative Fragmentadresse erhältst du mit:

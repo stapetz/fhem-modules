@@ -106,7 +106,24 @@ Die Redirect-URI muss exakt mit der Anwendung im Developer Portal übereinstimme
 
 Zusätzliche Datenbereiche sind über `scope_*` Attribute aktivierbar. Sie sind standardmäßig deaktiviert. Details zu Scopes, Dashboard, Readings, Sicherheit und Fehlerbehebung stehen in der [Betriebsdokumentation](DOKUMENTATION.md).
 
-## Hinweise
+## Darstellung im fhem-cms
+
+Das [VolvoConnect-Widget von fhem-cms](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget)
+verwendet die Readings dieses Moduls automatisch. Es bietet eine kleine
+Akku-/Reichweitenkachel mit Informationspopup oder eine eingebettete Vollansicht,
+Fahrzeugaktionen sowie verschiebbare, skalierbare und ausblendbare Detailkarten.
+
+**Das Widget funktioniert ausschließlich zusammen mit diesem VolvoConnect-Modul
+in derselben FHEM-Installation.** Es ersetzt weder die Modulinstallation noch die
+Volvo-Anmeldung. Das eigenständige Dashboard des Moduls bleibt unabhängig nutzbar;
+dessen Layout und das CMS-Widget werden getrennt gespeichert.
+
+- [GitHub-Wiki: Screenshots, Modulinstallation und Widgetbedienung](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget)
+- [Modul installieren und betreiben](DOKUMENTATION.md)
+- [FHEM-Wiki: VolvoConnect](https://wiki.fhem.de/wiki/VolvoConnect) und
+  [fhem-cms](https://wiki.fhem.de/wiki/Fhem-cms)
+
+## Betriebshinweise
 
 - Das Standardintervall für dynamische Werte beträgt 300 Sekunden; langsamere Diagnose-/Reifendaten werden standardmäßig alle 1800 Sekunden und der Standort alle 900 Sekunden abgefragt. Fähigkeiten, Befehlsliste und Fahrzeugdetails werden je VIN einmal geladen.
 - `set <name> update` erzwingt eine sofortige Aktualisierung aller aktivierten Endpunkte, auch wenn sie laut Intervall-Cache noch nicht fällig wären.
@@ -115,4 +132,4 @@ Zusätzliche Datenbereiche sind über `scope_*` Attribute aktivierbar. Sie sind 
 - Das Fahrzeug-Detail-API dokumentiert eine Außen- und eine Innenbild-URL. Volvo weist darauf hin, dass diese URLs befristet sind und nicht dauerhaft zwischengespeichert werden sollen.
 - Access- und Refresh-Tokens sowie API-Zugangsdaten nicht veröffentlichen oder in Support-Ausgaben einfügen.
 
-Stand der Dokumentation: 28.10.2026
+Stand der Dokumentation: 14.11.2026
