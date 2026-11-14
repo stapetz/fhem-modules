@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 5530673 fix: apply tile accent colors as inline styles to
+  prevent FHEM override after update
+  The tile accent colors (green #52bd8b, orange #e3b953, blue #8ab6d1) were
+  being overridden by FHEM's CSS after initial render. Fixed by:
+  1. Removing nth-child CSS rules that relied on DOM position
+  2. Computing accent color based on tile index (mod 3) at render time
+  3. Applying color directly as inline style attribute on tile and h2 elements
+  This ensures colors persist even when FHEM refreshes content or injects CSS.
 - bugfix: 2026-11-14 4c198d4 fix(dashboard): hardcode tile accent colors with
   !important to override FHEM cascade
   Replace CSS custom properties with direct hex color codes
