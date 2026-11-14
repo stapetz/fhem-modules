@@ -352,6 +352,16 @@ eigenes VolvoConnect-Widget bereit, das die Daten dieses Moduls automatisch übe
 [fhem-cms-Wiki: VolvoConnect-Widget](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget)
 und der Abschnitt „Darstellung im fhem-cms" in der [README](README.md).
 
+**Dieses CMS-Widget arbeitet ausschließlich mit dem VolvoConnect-Modul aus
+diesem Repository zusammen.** Modulinstallation, Volvo-Anmeldung und
+API-Berechtigungen bleiben Voraussetzung; das Widget ist keine separate
+Volvo-API-Anbindung. Die
+[bebilderte GitHub-Wiki-Anleitung](https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget#modul-installieren-und-einrichten)
+verknüpft die Modulinstallation mit Kompakt-/Vollansicht und der Widgetbedienung.
+Das Modul-Dashboard und das CMS-Widget haben voneinander unabhängige Layouts.
+Weitere Querverweise: [FHEM-Wiki: VolvoConnect](https://wiki.fhem.de/wiki/VolvoConnect)
+und [fhem-cms](https://wiki.fhem.de/wiki/Fhem-cms).
+
 ## Einbettung in FTUI
 
 Für die Einbettung in eine andere Seite liefert die Dashboard-URL mit dem
