@@ -2,6 +2,13 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 4c198d4 fix(dashboard): hardcode tile accent colors with
+  !important to override FHEM cascade [VolvoConnect]
+  Replace CSS custom properties with direct hex color codes
+  Apply !important to every color rule individually
+  Separate border-top-color rules by nth-child selector
+  Ensure green (#52bd8b), orange (#e3b953), and blue (#8ab6d1) display
+    correctly in FHEM modal
 - bugfix: 2026-11-14 9840aeb fix(dashboard): force correct tile accent colors
   in FHEM modal [VolvoConnect]
   Added !important to CSS custom properties (--tile-accent) to override FHEM
