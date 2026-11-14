@@ -1076,14 +1076,8 @@ sub VolvoConnect_BuildDashboard {
         . ".brand small{font:700 10px 'Helvetica Neue',sans-serif;letter-spacing:1.2px;color:#a9b7ac;}"
         . ".toolbar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}"
         . ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;padding:22px 24px 24px;background:linear-gradient(155deg,#26352e,#1b2823 62%,#202c27);flex:1;overflow-y:auto;}"
-        . ".tile{background:#26342d;padding:14px 15px;width:100%;min-width:0;break-inside:avoid;}"
-        . ".tile{border-top:2px solid #52bd8b!important;}"
-        . ".tile:nth-child(3n){border-top-color:#e3b953!important;}"
-        . ".tile:nth-child(3n+2){border-top-color:#8ab6d1!important;}"
+        . ".tile{background:#26342d;padding:14px 15px;width:100%;min-width:0;break-inside:avoid;border-top:2px solid;}"
         . ".tile h2{font:500 17px Georgia,serif;margin:0 0 8px;border-bottom:1px solid #46534a;padding-bottom:9px;display:flex;align-items:center;gap:8px;}"
-        . ".tile h2{color:#52bd8b!important;}"
-        . ".tile:nth-child(3n) h2{color:#e3b953!important;}"
-        . ".tile:nth-child(3n+2) h2{color:#8ab6d1!important;}"
         . ".tile.tile-hidden{display:none;}"
         . "body.edit-mode .tile.tile-hidden{display:block;opacity:.55;outline:1px dashed #69796f;}"
         . ".tile-edit-controls{display:none;margin-left:auto;align-items:center;gap:4px;color:#a9b7ac;font:normal 10px 'Helvetica Neue',sans-serif;}"
@@ -1192,6 +1186,7 @@ sub VolvoConnect_BuildDashboard {
         } @prefixes;
     }
 
+    my $tileIndex = 0;
     for my $prefix (@prefixes) {
         my $attrName = $scopeAttr{$prefix};
         if ($prefix eq "engineDiagnostics") {
@@ -1321,7 +1316,8 @@ sub VolvoConnect_BuildDashboard {
         } @entities;
 
         my $tileVisible = !exists($tileVisibility->{$prefix}) || $tileVisibility->{$prefix};
-        $html .= "<div class='tile" . ($tileVisible ? "" : " tile-hidden") . "' data-prefix='$prefix'><h2>"
+        my $accentColor = ($tileIndex % 3 == 0) ? "#52bd8b" : ($tileIndex % 3 == 1) ? "#8ab6d1" : "#e3b953";
+        $html .= "<div class='tile" . ($tileVisible ? "" : " tile-hidden") . "' data-prefix='$prefix' style='border-top-color:$accentColor!important'><h2 style='color:$accentColor!important'>"
             . VolvoConnect_HtmlEscape($labels{$prefix} // $prefix)
             . "<span class='tile-edit-controls'><label>anzeigen <input type='checkbox' class='tile-vis-toggle'"
             . ($tileVisible ? " checked" : "") . "></label></span>"
@@ -1367,6 +1363,7 @@ sub VolvoConnect_BuildDashboard {
                 . "<a class='location-attr' target='_blank' rel='noopener' href='https://www.openstreetmap.org/?mlat=$latitude&amp;mlon=$longitude#map=$zoom/$latitude/$longitude'>&copy; OpenStreetMap</a></div>";
         }
         $html .= "</div>";
+        $tileIndex++;
     }
 
     my @vehicleImages = (
