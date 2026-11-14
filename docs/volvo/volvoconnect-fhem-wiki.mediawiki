@@ -1,0 +1,386 @@
+{| class="float-right infobox toccolours" style="margin:0 0 1em 1em; float:right; border-style:solid; border-width:1px;" width="300"
+! colspan="2" style="background-color:#EFEFFF" | VolvoConnect
+|- style="background-color:#EFEFFF"
+! colspan="2" | Zweck / Funktion
+|- style="background-color:#FFFFFF"
+| colspan="2" | Volvo-Fahrzeugdaten über die Volvo Cars APIs in FHEM lesen und unterstützte Fahrzeugaktionen auslösen.
+|- style="background-color:#EFEFFF"
+! colspan="2" | Allgemein
+|- style="background-color:#FFFFFF"
+| Typ
+| Inoffizielles Community-Modul; externe Updatequelle.
+|- style="background-color:#EFEFFF"
+! colspan="2" | Details
+|- style="background-color:#FFFFFF"
+| Dokumentation
+| [https://github.com/stapetz/fhem-modules/blob/main/docs/volvo/DOKUMENTATION.md Installations- und Betriebsanleitung]
+|- style="background-color:#FFFFFF"
+| Modulname
+| <code>50_VolvoConnect.pm</code>
+|- style="background-color:#FFFFFF"
+| Ersteller / Betreuung
+| [https://github.com/stapetz stapetz]
+|- style="background-color:#FFFFFF"
+| Projekt
+| [https://github.com/stapetz/fhem-modules GitHub-Repository]
+|- style="background-color:#7FFFD4"
+| colspan="2" | '''Wichtig:''' Beachte die zum installierten Modul gehörende englische Beschreibung in der lokalen ''commandref''.
+|}
+[[Kategorie:Modul (Inoffiziell)]]
+
+'''VolvoConnect''' verbindet ein Volvo-Fahrzeug mit FHEM über die offiziellen Volvo Cars APIs. Du kannst unter anderem Ladezustand, Kilometerstand, Fahrzeugstatus, Diagnosewerte und optional den zuletzt bekannten Standort abrufen. Unterstützte Fahrzeugbefehle und ein eigenes Dashboard ergänzen die Readings.
+
+Das Modul ist ein '''Community-Projekt und kein von Volvo Cars herausgegebenes oder unterstütztes Produkt'''. Verfügbarkeit, Aktualität und Umfang hängen von Fahrzeugmodell, Modelljahr, Region, Volvo-Anwendung und genehmigten Berechtigungen ab.
+
+Dieser Artikel beschreibt den stabilen Modulstand '''1.1.0'''. Für aktuelle Freigaben und Änderungen beachte die [https://github.com/stapetz/fhem-modules/blob/main/CHANGED_volvo Änderungshistorie].
+
+__TOC__
+
+== Voraussetzungen ==
+
+* Eine aktuelle FHEM-Installation mit FHEMWEB und HTTPS-Zugriff auf die Volvo-Endpunkte.
+* Die Perl-Module <code>JSON</code>, <code>MIME::Base64</code> und <code>Digest::SHA</code>; <code>HttpUtils</code> gehört zu FHEM.
+* Eine Volvo ID mit zugeordnetem Fahrzeug.
+* Die 17-stellige Fahrzeugidentifikationsnummer (VIN).
+* Eine Anwendung im [https://developer.volvocars.com/ Volvo Cars Developer Portal].
+* VCC API Key, OAuth Client-ID und Client-Secret dieser Anwendung.
+* Eine von Volvo für die Anwendung akzeptierte Redirect-URI.
+
+{{Hinweis|'''Die VIN ist nicht die Volvo ID.''' Ein in der Volvo-App sichtbares Fahrzeug bedeutet nicht automatisch, dass jede Developer-API oder jeder Befehl für deine Anwendung freigeschaltet ist. Maßgeblich sind die aktuellen Volvo-Bedingungen und Freigaben.}}
+
+== Sicherheit und Datenschutz ==
+
+VolvoConnect verwendet Volvo-Cloud-Dienste. FHEM benötigt dafür Zugangsdaten und OAuth-Tokens.
+
+* Schütze FHEMWEB mit geeigneter Anmeldung, Rechten und bei Bedarf HTTPS bzw. einem abgesicherten Zugang. Gib die Oberfläche nicht ungeschützt im Internet frei.
+* Behandle <code>client_secret</code> und <code>vcc_api_key</code> wie Passwörter. Sie werden als FHEM-Attribute konfiguriert; FHEM-Konfigurationen und Sicherungen müssen entsprechend geschützt sein.
+* Veröffentliche keine Autorisierungscodes, Tokens, VIN, Standortkoordinaten oder unbereinigten Device-Ausgaben.
+* Aktiviere nur tatsächlich benötigte Daten- und Befehlsbereiche.
+* Fahrzeugbefehle können reale Auswirkungen haben. Prüfe Fahrzeugzustand und Berechtigungen vor der Bedienung.
+* Die Standortkarte und die optionale Adressauflösung können externe Dienste verwenden. Hinweise dazu stehen im Abschnitt Standort.
+
+== Anwendung bei Volvo einrichten ==
+
+# Melde dich im Volvo Cars Developer Portal an.
+# Lege eine Anwendung an und prüfe deren Test-/Produktions- und Regionsbeschränkungen.
+# Übernimm den VCC API Key sowie OAuth Client-ID und Client-Secret in deine sichere lokale Konfiguration.
+# Registriere die gewünschte Redirect-URI.
+# Aktiviere bzw. beantrage die benötigten APIs und Berechtigungen.
+# Prüfe, ob Anwendung, Volvo ID und Fahrzeug für diesen Zugriff zugelassen sind.
+
+Die Portalbezeichnungen können sich ändern. Die folgenden Schritte beschreiben den Ablauf, nicht eine unveränderliche Bildschirmfolge im Volvo-Portal.
+
+=== Redirect-URI ===
+
+Die URI muss in FHEM und im Developer Portal '''zeichengetreu übereinstimmen''': Schema, Host, Port, Pfad und gegebenenfalls abschließender Schrägstrich.
+
+Für lokale Tests wird häufig <code>http://localhost</code> verwendet, '''sofern Volvo diese URI für deine Anwendung akzeptiert'''. Das Modul verwendet die manuelle Übergabe des Autorisierungscodes; eine öffentlich erreichbare Callback-Seite ist dafür nicht erforderlich.
+
+Eine nach dem Login nicht erreichbare lokale Zielseite ist für sich genommen noch kein fehlgeschlagener Login: Entscheidend ist, ob die Weiterleitungsadresse einen gültigen <code>code</code>-Parameter enthält. Kopiere niemals den Wert von <code>state</code> anstelle des Codes.
+
+== Installation ==
+
+Erstelle vor Änderungen eine Sicherung deiner FHEM-Installation.
+
+Gib diese Befehle in die '''FHEM-Befehlszeile''' ein, nicht in ein Betriebssystemterminal:
+
+<pre>
+update add https://raw.githubusercontent.com/stapetz/fhem-modules/main/controls_volvo.txt
+update all https://raw.githubusercontent.com/stapetz/fhem-modules/main/controls_volvo.txt
+shutdown restart
+</pre>
+
+{{Hinweis|Die Adresse zeigt bewusst auf eine '''Controls-Datei''', nicht direkt auf die Perl-Datei. <code>update add</code> registriert die Quelle; <code>update all</code> lädt die zugehörigen Dateien. Der Neustart unterbricht FHEM kurz.}}
+
+Für den produktiven Einsatz verwendest du '''main'''. Entwicklungsstände aus '''dev''' sind nur für bewusst durchgeführte Tests vorgesehen.
+
+== Device anlegen und konfigurieren ==
+
+Beispiel für ein Device namens <code>Volvo1</code>:
+
+<pre>
+define Volvo1 VolvoConnect
+attr Volvo1 vin &lt;17-stellige-VIN&gt;
+attr Volvo1 client_id &lt;Client-ID&gt;
+attr Volvo1 client_secret &lt;Client-Secret&gt;
+attr Volvo1 vcc_api_key &lt;VCC-API-Key&gt;
+attr Volvo1 redirect_uri http://localhost
+</pre>
+
+Ersetze die Platzhalter einschließlich der spitzen Klammern durch deine Werte. Passe die Redirect-URI an die tatsächlich registrierte URI an. Speichere die FHEM-Konfiguration und halte sie vertraulich.
+
+=== Benötigte Datenbereiche auswählen ===
+
+Öffne die grafische Auswahl:
+
+<pre>
+get Volvo1 _showEntityConfig
+</pre>
+
+Alternativ setzt du die Attribute direkt, beispielsweise:
+
+<pre>
+attr Volvo1 scope_battery_charge 1-aktiviert
+attr Volvo1 scope_odometer 1-aktiviert
+attr Volvo1 scope_engine_status 1-aktiviert
+</pre>
+
+Nicht gesetzte <code>scope_*</code>-Attribute sind deaktiviert. Konfiguriere die benötigten Bereiche möglichst '''vor der Anmeldung'''.
+
+{{Hinweis|'''Scope-Änderungen erfordern eine neue Anmeldung.''' Eine Änderung der Scope-Auswahl löscht die bestehende Autorisierung; anschließend musst du dich erneut bei Volvo anmelden. Das Aktivieren in FHEM erteilt keine fehlende Berechtigung im Developer Portal.}}
+
+{| class="wikitable"
+! Attribute !! Daten / Funktion
+|-
+| <code>scope_capabilities</code> || Fahrzeugfähigkeiten und unterstützte Energiefunktionen.
+|-
+| <code>scope_vehicle_relation</code> || Modell, Modelljahr, Fahrzeugdetails und Bild-URLs.
+|-
+| <code>scope_battery_charge</code>, <code>scope_fuel</code> || Batterie- und Kraftstoffdaten; der Batteriebereich aktiviert ebenfalls den Fuel-Abruf.
+|-
+| <code>scope_odometer</code>, <code>scope_statistics</code> || Kilometerstand, Fahrt- und Verbrauchsstatistik.
+|-
+| <code>scope_warnings</code>, <code>scope_brakes</code> || Warnungen und Bremsstatus.
+|-
+| <code>scope_doors</code>, <code>scope_windows</code> || Tür-, Verriegelungs- und Fensterstatus.
+|-
+| <code>scope_engine_status</code> || Motorstatus.
+|-
+| <code>scope_tyres</code> || Reifendaten.
+|-
+| <code>scope_engine_diagnostics</code>, <code>scope_workshop_diagnostics</code> || Motor-, Werkstatt- und Wartungsinformationen.
+|-
+| <code>scope_location</code> || Standortdaten und Karte.
+|-
+| <code>scope_commands</code>, <code>scope_command_accessibility</code> || Befehlsliste und aktuelle Befehlsverfügbarkeit.
+|-
+| <code>scope_lock</code>, <code>scope_unlock</code> || Ver- und Entriegeln.
+|-
+| <code>scope_honk_flash</code> || Hupe-/Lichtsignalbereich.
+|-
+| <code>scope_climatization</code>, <code>scope_engine_commands</code> || Klimatisierung, Motorbefehle und Vorkonditionierung, soweit unterstützt.
+|}
+
+== Anmeldung mit OAuth2 und PKCE ==
+
+# Starte die Anmeldung mit <code>set Volvo1 reauth</code>.
+# Öffne den angebotenen Volvo-Login-Link am Gerätestatus.
+# Melde dich mit der passenden Volvo ID an und bestätige die angeforderten Berechtigungen.
+# Lies nach der Weiterleitung die Adresse aus.
+# Kopiere '''nur den Wert des URL-Parameters code''', nicht die komplette Adresse und nicht den <code>state</code>-Wert.
+# Übergib den Code zeitnah an FHEM.
+
+<pre>
+set Volvo1 authCode &lt;Autorisierungscode&gt;
+</pre>
+
+Der Code ist kurzlebig und nur einmal verwendbar. Bei einem Fehler wiederholst du den vollständigen Login mit einem neuen Code.
+
+Prüfe anschließend:
+
+<pre>
+get Volvo1 summary
+get Volvo1 tokenInfo
+get Volvo1 scopes
+set Volvo1 update
+</pre>
+
+<code>tokenInfo</code> zeigt Vorhandensein und Gültigkeit der Tokens, nicht deren Werte. Access- und Refresh-Tokens werden im FHEM-Key-Value-Store gespeichert. Das Modul erneuert Access-Tokens bei Bedarf automatisch mit dem gespeicherten Refresh-Token.
+
+Wird die Erneuerung von Volvo abgelehnt, ist eine neue interaktive Anmeldung erforderlich. Prüfe <code>lastError</code> und führe <code>reauth</code> aus. Nach Änderungen an Client-ID, Client-Secret, API-Key oder Scopes autorisierst du ebenfalls neu.
+
+== Datenabruf und Intervalle ==
+
+{| class="wikitable"
+! Einstellung !! Standard !! Typische Daten
+|-
+| <code>interval</code> || 300 Sekunden || Energie-/Ladestatus, Kilometerstand, Statistik, Warnungen und weitere dynamische Zustände.
+|-
+| <code>interval_slow</code> || 1800 Sekunden || Reifen-, Motor- und Werkstattdiagnose.
+|-
+| <code>interval_location</code> || 900 Sekunden || Standort.
+|-
+| Statische Endpunkte || Einmal je VIN || Fähigkeiten, Befehlsliste und Fahrzeugdetails.
+|}
+
+Beispiel:
+
+<pre>
+attr Volvo1 interval 300
+attr Volvo1 interval_slow 1800
+attr Volvo1 interval_location 900
+</pre>
+
+Erfolgreiche Endpoint-Abrufe werden zwischengespeichert; ihre Zeitpunkte bleiben über einen FHEM-Neustart erhalten. Ein manueller Abruf übergeht die Intervallplanung und fordert alle aktivierten Endpunkte an:
+
+<pre>
+set Volvo1 update
+</pre>
+
+Damit kannst du auch statische Fahrzeugdetails und befristete Bild-URLs neu laden. Reduziere die Intervalle nicht unnötig: Volvo kann Abfragen begrenzen, und häufigeres Polling macht veraltete Backendwerte nicht automatisch aktueller.
+
+== Readings verstehen ==
+
+Readings entstehen abhängig von Scopes und API-Antworten dynamisch. Verschachtelte JSON-Felder werden mit Unterstrichen abgeflacht; Einheiten können in zusätzlichen <code>_unit</code>-Readings erscheinen.
+
+{| class="wikitable"
+! Reading / Präfix !! Bedeutung
+|-
+| <code>authStatus</code> || Authentifizierungsstatus.
+|-
+| <code>lastUpdate</code> || Letzter erfolgreicher Datenabruf.
+|-
+| <code>lastError</code>, <code>lastErrorCode</code> || Letzter bekannter Fehler.
+|-
+| <code>state_*</code> || Energie- und Ladezustandsdaten, etwa <code>state_batteryChargeLevel</code>.
+|-
+| <code>doors_*</code>, <code>windows_*</code>, <code>warnings_*</code> || Karosseriestatus und Warnungen.
+|-
+| <code>fuel_*</code>, <code>batteryCharge_*</code>, <code>odometer_*</code>, <code>statistics_*</code> || Energie-, Fahrt- und Fahrzeugwerte.
+|-
+| <code>engine_*</code>, <code>engineDiagnostics_*</code>, <code>workshopDiagnostics_*</code>, <code>tyres_*</code> || Motor-, Diagnose- und Reifendaten.
+|-
+| <code>vehicle_*</code>, <code>capabilities_*</code> || Fahrzeugdetails und Fähigkeiten.
+|-
+| <code>location_*</code> || Standort und gegebenenfalls Adressdaten.
+|-
+| <code>commands_*</code>, <code>commandAccessibility_*</code> || Befehle und deren Verfügbarkeit.
+|-
+| <code>command_state</code>, <code>last_command</code> || Status des zuletzt gesendeten Fahrzeugbefehls.
+|}
+
+Ein fehlendes Reading bedeutet nicht automatisch einen Modulfehler. Prüfe Scope, Fahrzeugunterstützung und Volvo-Freigabe. Ein erfolgreicher API-Abruf ist außerdem nicht zwingend eine aktuelle Messung direkt am Fahrzeug.
+
+== Fahrzeugbefehle ==
+
+{{Hinweis|'''Achtung: Die folgenden Befehle lösen reale Fahrzeugaktionen aus.''' Verwende sie nur bewusst und unter geeigneten Bedingungen. API- oder Fahrzeugbeschränkungen lassen sich nicht durch wiederholtes Senden umgehen.}}
+
+{| class="wikitable"
+! FHEM-Befehl !! Wirkung
+|-
+| <code>set Volvo1 lock</code> / <code>set Volvo1 unlock</code> || Verriegeln / Entriegeln.
+|-
+| <code>set Volvo1 horn</code> || Hupe betätigen.
+|-
+| <code>set Volvo1 climate</code> / <code>set Volvo1 climate_stop</code> || Klimatisierung starten / stoppen.
+|-
+| <code>set Volvo1 charge_start</code> / <code>set Volvo1 charge_stop</code> || Laden starten / stoppen.
+|-
+| <code>set Volvo1 charge_limit 80</code> || Zielladestand setzen; Modulwertebereich 10 bis 100 Prozent, Fahrzeugunterstützung vorausgesetzt.
+|-
+| <code>set Volvo1 precondition</code> || Vorkonditionierung anfordern.
+|}
+
+Die passenden Scopes müssen aktiviert und autorisiert sein. Eine unmittelbare FHEM-Rückmeldung über die Übergabe bedeutet noch nicht, dass die Aktion am Fahrzeug erfolgreich abgeschlossen ist. Prüfe danach <code>command_state</code>, <code>last_command</code> und den tatsächlichen Fahrzeugzustand.
+
+== Dashboard ==
+
+<pre>
+get Volvo1 _showDashboard
+get Volvo1 _dashboardURL
+</pre>
+
+Das Dashboard gruppiert Messwerte und Zustände in Kacheln und bietet unterstützte Fahrzeugaktionen. Bei aktiviertem Standortbereich erscheint eine Standortkachel mit Karte.
+
+* '''Bearbeiten''' ist beim Aufruf über <code>_showDashboard</code> verfügbar.
+* Dort kannst du Kacheln und einzelne Readings ein-/ausblenden sowie Labels und Reihenfolgen speichern.
+* Die isolierte Dashboard-URL ist nicht editierbar und zeigt keinen Bearbeitungsstift.
+* Die Vier-Wege-Pfeile aktivieren den kompakten Verschiebemodus.
+* Das responsive Mehrspaltenlayout zeigt die gespeicherte Reihenfolge spaltenweise, nicht als starres zeilenweises Raster.
+* Die Konfiguration wird je Device im FHEM-Key-Value-Store gespeichert.
+
+Die Adresse liegt unter deinem FHEMWEB-Pfad, beispielsweise <code>/fhem/VolvoConnect/Volvo1</code>. Verwende bevorzugt den vom Modul gelieferten Link.
+
+=== Einbettung in andere Oberflächen ===
+
+Die relative Fragmentadresse erhältst du mit:
+
+<pre>
+get Volvo1 _dashboardEmbedURL
+</pre>
+
+Der Parameter <code>embed=1</code> liefert ein HTML-Fragment für geeignete Oberflächen. Eine einfache Iframe-Einbindung der vollständigen Seite ist beispielsweise:
+
+<pre>
+<nowiki><iframe src="/fhem/VolvoConnect/Volvo1" style="width:100%;height:900px;border:0"></iframe></nowiki>
+</pre>
+
+Passe FHEMWEB-Pfad und Device-Namen an. Anmeldung, Browserregeln und die Möglichkeiten der Zieloberfläche gelten weiterhin. Die weiterführenden FTUI-Beispiele in der Repositorydokumentation sind nicht als getestete FTUI-Installation zugesichert.
+
+== Standort und Adressauflösung ==
+
+{{Hinweis|Die Location API liefert den '''zuletzt bekannten Standort, keine Live-Ortung'''.}}
+
+Bei aktivem <code>scope_location</code> ist die zusätzliche Adressauflösung standardmäßig eingeschaltet: Neue Koordinaten werden an OpenStreetMap Nominatim übermittelt. Wenn du das nicht möchtest, deaktiviere die externe Adressabfrage:
+
+<pre>
+attr Volvo1 location_reverse_geocode 0
+</pre>
+
+Das deaktiviert die zusätzliche Adressauflösung, nicht den Volvo-Standortabruf. Soll das Modul auch keine Standortdaten von Volvo abrufen, deaktiviere den Standort-Scope und autorisiere die geänderte Auswahl neu.
+
+== Updates und Sicherungen ==
+
+Für spätere stabile Updates:
+
+<pre>
+update all https://raw.githubusercontent.com/stapetz/fhem-modules/main/controls_volvo.txt
+shutdown restart
+</pre>
+
+Prüfe das Updateprotokoll und danach das Internal '''VERSION'''. Lade Dashboardseiten vollständig neu.
+
+Sichere zusammengehörig:
+
+* FHEM-Device-Definition und Attribute.
+* Die FHEM-Konfiguration.
+* Den FHEM-Key-Value-Store für Tokens, Abrufzustände und Dashboardkonfiguration.
+* Einen nachvollziehbaren Modulstand.
+
+Sicherungen können Zugangsdaten enthalten und müssen geschützt werden. Bei einem Umzug prüfst du Redirect-URI, Netzwerkerreichbarkeit und Volvo-Portal-Konfiguration.
+
+<code>set Volvo1 reauth</code> entfernt die Tokens und startet die Anmeldung neu; Device-Attribute und Dashboardkonfiguration werden dadurch nicht zurückgesetzt.
+
+== Häufige Probleme ==
+
+{| class="wikitable"
+! Problem !! Prüfung / Abhilfe
+|-
+| Gerät bleibt bei <code>auth_required</code> || VIN, Clientdaten, API-Key, Redirect-URI und Fahrzeugfreigabe prüfen; mit <code>reauth</code> neu anmelden.
+|-
+| OAuth-Code abgelehnt || Frischen Code verwenden; nur den <code>code</code>-Wert kopieren. Redirect-URI und Scopes prüfen.
+|-
+| Nach Scope-Änderung keine Daten || Erneute Volvo-Autorisierung erforderlich.
+|-
+| Wenige oder fehlende Readings || <code>get Volvo1 scopes</code>, Fahrzeugunterstützung und Volvo-Freigabe prüfen; anschließend <code>set Volvo1 update</code>.
+|-
+| Daten oder Standort wirken veraltet || Aktualität des Volvo-Backends und langsamere Intervalle beachten; kein Live-Ortungssystem.
+|-
+| Fahrzeugbefehl wirkt nicht || Scope, Autorisierung, Verfügbarkeit, Fahrzeugzustand und <code>command_state</code> prüfen.
+|-
+| Fahrzeugbild nicht mehr sichtbar || Befristete Bild-URL mit <code>set Volvo1 update</code> neu abrufen.
+|-
+| Dashboard lässt sich nicht bearbeiten || Über <code>get Volvo1 _showDashboard</code> öffnen, nicht über die isolierte Dashboard-URL.
+|-
+| Token-Erneuerung schlägt fehl || <code>lastError</code> prüfen und gegebenenfalls vollständig neu anmelden.
+|}
+
+Für eine lesende Diagnose:
+
+<pre>
+get Volvo1 summary
+get Volvo1 tokenInfo
+get Volvo1 scopes
+</pre>
+
+Veröffentliche Ausgaben nur bereinigt. Insbesondere vollständige Device-Listen und Konfigurationsdateien können geheime Attribute oder private Fahrzeugdaten enthalten.
+
+== Dokumentation und Support ==
+
+* [https://github.com/stapetz/fhem-modules/blob/main/docs/volvo/README.md Modulübersicht und Schnellstart]
+* [https://github.com/stapetz/fhem-modules/blob/main/docs/volvo/DOKUMENTATION.md Ausführliche Installations- und Betriebsanleitung]
+* [https://github.com/stapetz/fhem-modules/blob/main/CHANGED_volvo Änderungshistorie]
+* [https://github.com/stapetz/fhem-modules/issues Fehlerberichte und Weiterentwicklungen]
+* [https://developer.volvocars.com/ Volvo Cars Developer Portal]
+
+Beschreibe bei Fehlerberichten Modulversion, erwartetes und tatsächliches Verhalten sowie reproduzierbare Schritte und bereinigte Fehlermeldungen. Nenne keine Zugangsdaten, Autorisierungscodes, Tokens, VIN oder Standortdaten.

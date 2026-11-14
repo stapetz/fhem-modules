@@ -1142,8 +1142,6 @@ sub VolvoConnect_BuildDashboard {
         . ".action-status{display:block;min-height:16px;margin-top:8px;color:#a9b7ac;font-size:12px;}"
         . ".save-btn{display:none;}"
         . "body.edit-mode .save-btn{display:inline-block;}"
-        . "\@media(max-width:760px){body{padding:8px}.grid{padding:16px 15px 18px}.actions{padding:14px 15px}.toolbar{padding:13px 15px}}"
-        . "\@media(max-width:500px){.toolbar{align-items:flex-start;flex-wrap:wrap;gap:10px}.brand{flex:1 1 100%}.toolbar-controls{width:100%;justify-content:flex-start}.auth-indicator{margin-left:auto}.grid{gap:7px;padding:14px 12px}.actions{padding:13px 12px}.actions .btn{font-size:11px;padding:7px 8px}.vehicle-image-gallery .vehicle-image{max-width:100%;}}"
         . "</style></head><body><div class='wrap' data-device='" . VolvoConnect_HtmlEscape($name)
         . "' data-fhem-path='" . VolvoConnect_HtmlEscape($fhemPath)
         . "' data-csrf='$csrf'>"
