@@ -2,6 +2,16 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 efcbe2d fix(dashboard): deliver _showDashboard as scoped
+  fragment like _showEntityConfig
+  The FHEM dialog received the full standalone page (global body/h1/.tile CSS),
+  which collided with the FHEMWEB stylesheet and flipped the layout after load.
+  Now _showDashboard returns the scoped embed fragment (.vcc-embed) via
+  VolvoConnect_EmbedFragment, the same technique _showEntityConfig uses.
+  Reverts the symptom fixes that this replaces:
+  inline !important accent styles per tile (back to nth-child custom
+    properties)
+  modal-only flex/overflow layout (restores max-width:1120px per design doc)
 - bugfix: 2026-11-14 5530673 fix: apply tile accent colors as inline styles to
   prevent FHEM override after update
   The tile accent colors (green #52bd8b, orange #e3b953, blue #8ab6d1) were
