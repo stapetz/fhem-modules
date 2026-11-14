@@ -284,6 +284,7 @@ Das Dashboard gruppiert Messwerte und Zustände in Kacheln und bietet unterstüt
 
 * '''Bearbeiten''' ist beim Aufruf über <code>_showDashboard</code> verfügbar.
 * Dort kannst du Kacheln und einzelne Readings ein-/ausblenden sowie Labels und Reihenfolgen speichern.
+* Der Dialog zeigt das Dashboard als gekapseltes Fragment mit eigenem Stil; das FHEMWEB-Theme beeinflusst die Darstellung nicht.
 * Die isolierte Dashboard-URL ist nicht editierbar und zeigt keinen Bearbeitungsstift.
 * Die Vier-Wege-Pfeile aktivieren den kompakten Verschiebemodus.
 * Das responsive Mehrspaltenlayout zeigt die gespeicherte Reihenfolge spaltenweise, nicht als starres zeilenweises Raster.
@@ -299,7 +300,7 @@ Die relative Fragmentadresse erhältst du mit:
 get Volvo1 _dashboardEmbedURL
 </pre>
 
-Der Parameter <code>embed=1</code> liefert ein HTML-Fragment für geeignete Oberflächen. Eine einfache Iframe-Einbindung der vollständigen Seite ist beispielsweise:
+Der Parameter <code>embed=1</code> liefert ein HTML-Fragment für geeignete Oberflächen. Mit dem zusätzlichen Parameter <code>edit=1</code> (<code>?embed=1&edit=1</code>) ist das Fragment editierbar und zeigt den Bearbeitungsstift. Eine einfache Iframe-Einbindung der vollständigen Seite ist beispielsweise:
 
 <pre>
 <nowiki><iframe src="/fhem/VolvoConnect/Volvo1" style="width:100%;height:900px;border:0"></iframe></nowiki>

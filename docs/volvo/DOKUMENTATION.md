@@ -317,7 +317,10 @@ Vor sicherheitsrelevanten Befehlen wie `lock`, `unlock`, `horn` oder Klimatisier
 ## 9. Dashboard
 
 - `get <name> _dashboardURL` liefert die vollständige Dashboard-URL; alternativ ist es unter `<FHEM-URL>/VolvoConnect/<name>` erreichbar.
-- `get <name> _showDashboard` gibt die Dashboard-Seite direkt in FHEM aus.
+- `get <name> _showDashboard` gibt das Dashboard direkt in FHEM aus. Seit
+  1.1.1 wird es dabei wie `_showEntityConfig` als gekapseltes Fragment mit
+  eigenem, gescoptem Stil geliefert; das FHEMWEB-Theme beeinflusst die
+  Darstellung im Dialog nicht mehr.
 - Das Dashboard gruppiert verfügbare Readings in Kacheln und bietet Fahrzeugaktionen, Statusanzeigen sowie bei aktivem Standort-Scope eine Karte.
 - Das Bearbeiten-Symbol wird nur beim Aufruf mit `get <name> _showDashboard`
   angezeigt. Dort lassen sich Kacheln und Readings ein-/ausblenden sowie
@@ -348,7 +351,7 @@ Für die Einbettung in eine andere Seite liefert die Dashboard-URL mit dem
 Parameter `embed=1` nur ein Fragment ohne `<html>`, `<head>` und `<body>`.
 Die relative URL ermittelt `get MeinVolvo _dashboardEmbedURL`, sie
 lautet zum Beispiel `/fhem/VolvoConnect/MeinVolvo?embed=1`.
-Im Embed-Modus ist das Dashboard nicht editierbar. Stil und Skript sind auf das Fragment begrenzt, die Aktualisierung läuft über diese Adresse und nicht über die der einbettenden Seite.
+Im Embed-Modus ist das Dashboard standardmäßig nicht editierbar; mit dem zusätzlichen Parameter `edit=1` (`?embed=1&edit=1`) erscheint der Bearbeitungsstift. Stil und Skript sind auf das Fragment begrenzt, die Aktualisierung läuft über diese Adresse und nicht über die der einbettenden Seite.
 
 Das Fragment enthält ein Skript. Ein einfaches HTML-Widget, das den Inhalt nur
 per `innerHTML` setzt, führt dieses Skript nicht aus. Die folgenden Beispiele setzen voraus, dass FTUI und FHEMWEB über denselben Host und Port
