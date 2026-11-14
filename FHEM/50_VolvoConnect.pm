@@ -3,7 +3,7 @@ package main;
 use strict;
 use warnings;
 
-our $VolvoConnect_VERSION = '1.1.0';
+our $VolvoConnect_VERSION = '1.1.1';
 use utf8;
 use HttpUtils;
 use JSON;
@@ -995,7 +995,8 @@ sub VolvoConnect_CGI($) {
         if (!$hash || $hash->{TYPE} ne "VolvoConnect");
 
     my $embed = $request =~ /[?&]embed=1(?:&|$)/ ? 1 : 0;
-    my $html = eval { VolvoConnect_BuildDashboard({hash => $hash, editable => 0, embed => $embed}) };
+    my $edit = $embed && $request =~ /[?&]edit=1(?:&|$)/ ? 1 : 0;
+    my $html = eval { VolvoConnect_BuildDashboard({hash => $hash, editable => $edit, embed => $embed}) };
     if ($@ || !defined($html)) {
         Log3 $name, 2, "VolvoConnect ($name) - Dashboard rendering failed: $@";
         return ("text/plain; charset=utf-8", "Dashboard-Fehler: $@");
@@ -1065,6 +1066,7 @@ sub VolvoConnect_BuildDashboard {
         . "<title>$name Dashboard</title>"
         . "<style>"
         . "*{box-sizing:border-box;}"
+        . "input,button{font:inherit;box-shadow:none;border-radius:0;text-shadow:none;background-image:none;}"
         . "body{font-family:'Avenir Next','Helvetica Neue',sans-serif;background:#151f1b;color:#f4f4e9;margin:0;padding:12px;overflow-x:hidden;font-size:14px;line-height:1.4;}"
         . "h1{font:500 22px Georgia,serif;margin:3px 0;letter-spacing:0;line-height:1.1;}"
         . ".wrap{width:100%;max-width:1120px;margin:0 auto;padding-bottom:0;background:#1d2825;border:1px solid #46544c;box-shadow:0 16px 44px #0c16124a;overflow:hidden;}"
@@ -1074,8 +1076,8 @@ sub VolvoConnect_BuildDashboard {
         . ".brand-mark svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}"
         . ".brand small{font:700 10px 'Helvetica Neue',sans-serif;letter-spacing:1.2px;color:#a9b7ac;}"
         . ".toolbar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}"
-        . ".grid{column-width:280px;column-gap:10px;column-fill:balance;padding:22px 24px 24px;background:linear-gradient(155deg,#26352e,#1b2823 62%,#202c27);}"
-        . ".tile{display:inline-block;vertical-align:top;--tile-accent:#52bd8b;background:#26342d;border-top:2px solid var(--tile-accent);padding:14px 15px;width:100%;min-width:0;margin:0 0 10px;break-inside:avoid;}"
+        . ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;padding:22px 24px 24px;background:linear-gradient(155deg,#26352e,#1b2823 62%,#202c27);}"
+        . ".tile{--tile-accent:#52bd8b;background:#26342d;border-top:2px solid var(--tile-accent);padding:14px 15px;width:100%;min-width:0;break-inside:avoid;}"
         . ".tile:nth-child(3n){--tile-accent:#e3b953;} .tile:nth-child(3n+2){--tile-accent:#8ab6d1;}"
         . ".tile h2{font:500 17px Georgia,serif;margin:0 0 8px;color:var(--tile-accent);border-bottom:1px solid #46534a;padding-bottom:9px;display:flex;align-items:center;gap:8px;}"
         . ".tile.tile-hidden{display:none;}"
@@ -1142,18 +1144,17 @@ sub VolvoConnect_BuildDashboard {
         . ".action-status{display:block;min-height:16px;margin-top:8px;color:#a9b7ac;font-size:12px;}"
         . ".save-btn{display:none;}"
         . "body.edit-mode .save-btn{display:inline-block;}"
-        . "\@media(max-width:760px){body{padding:8px}.grid{padding:16px 15px 18px}.actions{padding:14px 15px}.toolbar{padding:13px 15px}}"
-        . "\@media(max-width:500px){.toolbar{align-items:flex-start;flex-wrap:wrap;gap:10px}.brand{flex:1 1 100%}.toolbar-controls{width:100%;justify-content:flex-start}.auth-indicator{margin-left:auto}.grid{gap:7px;padding:14px 12px}.actions{padding:13px 12px}.actions .btn{font-size:11px;padding:7px 8px}.vehicle-image-gallery .vehicle-image{max-width:100%;}}"
         . "</style></head><body><div class='wrap' data-device='" . VolvoConnect_HtmlEscape($name)
         . "' data-fhem-path='" . VolvoConnect_HtmlEscape($fhemPath)
+        . "' data-editable='" . ($options->{editable} ? "1" : "0")
         . "' data-csrf='$csrf'>"
         . "<div class='toolbar'><div class='brand'><span class='brand-mark' aria-hidden='true'><svg viewBox='0 0 24 24'><path d='M3 14.5 4.5 9h15l1.5 5.5V19h-2v-2H5v2H3z'/><path d='M5 9l2-4h10l2 4M3 13h18'/><circle cx='7' cy='14' r='1'/><circle cx='17' cy='14' r='1'/></svg></span><div><small>VOLVO CONNECT / FAHRZEUG</small><h1>$name</h1></div></div>"
         . "<div class='toolbar-controls'>"
         . ($options->{editable}
-            ? "<button type='button' class='btn icon-btn' title='Bearbeiten' aria-label='Bearbeiten' onclick='toggleEdit()'>&#9998;</button>"
+            ? "<button type='button' class='btn icon-btn' title='Bearbeiten' aria-label='Bearbeiten'>&#9998;</button>"
             : "")
         . ($options->{editable}
-            ? "<button type='button' class='btn save-btn' onclick='saveDashboardConfig()'>&#128190; Speichern</button>"
+            ? "<button type='button' class='btn save-btn'>&#128190; Speichern</button>"
             : "")
         . "</div><span class='auth-indicator' role='img' aria-label='" . VolvoConnect_HtmlEscape($authStatusTitle)
         . "' title='" . VolvoConnect_HtmlEscape($authStatusTitle) . "'><span class='auth-dot "
@@ -1322,7 +1323,7 @@ sub VolvoConnect_BuildDashboard {
             . "<span class='tile-edit-controls'><label>anzeigen <input type='checkbox' class='tile-vis-toggle'"
             . ($tileVisible ? " checked" : "") . "></label></span>"
             . ($options->{editable}
-                ? "<button type='button' class='tile-move-toggle' aria-label='Kacheln verschieben' aria-pressed='false' title='Kacheln verschieben' onclick='toggleTileReorderMode()'><span aria-hidden='true'>&#8598;&#8599;<br>&#8601;&#8600;</span></button>"
+                ? "<button type='button' class='tile-move-toggle' aria-label='Kacheln verschieben' aria-pressed='false' title='Kacheln verschieben'><span aria-hidden='true'>&#8598;&#8599;<br>&#8601;&#8600;</span></button>"
                 : "")
             . "</h2>";
         for my $entity (@ordered) {
@@ -1516,9 +1517,9 @@ sub VolvoConnect_BuildDashboard {
         . "  });"
         . "  var json = asciiSafeJson(config);"
         . "  var b64 = btoa(json);"
-        . "  var url = '/fhem?cmd=set%20" . urlEncode($name) . "%20saveDashboardConfig%20' + b64 + '&XHR=1';"
-        . "  fetch(url).then(function(response){"
-        . "    if(!response.ok) throw new Error('Speichern fehlgeschlagen');"
+        . "  var url = ((dashboard&&dashboard.getAttribute('data-fhem-path'))||'/fhem')+'?XHR=1';"
+        . "  fetch(url, {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cmd=set%20" . urlEncode($name) . "%20saveDashboardConfig%20' + encodeURIComponent(b64)+(csrf?'&fwcsrf='+encodeURIComponent(csrf):'')}).then(function(response){"
+        . "    if(!response.ok) throw new Error('Speichern fehlgeschlagen: HTTP ' + response.status);"
         . "    document.querySelectorAll('.tile[data-prefix]').forEach(function(tile){"
         . "      var visibility = tile.querySelector('.tile-vis-toggle');"
         . "      tile.classList.toggle('tile-hidden', !(visibility && visibility.checked));"
@@ -1528,6 +1529,13 @@ sub VolvoConnect_BuildDashboard {
         . "    document.querySelectorAll('.key-input').forEach(function(el){ el.readOnly = true; });"
         . "  }).catch(function(error){ window.alert(error.message); });"
         . "}"
+        # Buttons are wired up via listeners (no inline onclick) so the code also works
+        # inside the scoped embed fragment, where functions are not global (see _showEntityConfig).
+        . "var vccEditBtn=dashboard&&dashboard.querySelector('.icon-btn');"
+        . "if(vccEditBtn)vccEditBtn.addEventListener('click',function(){toggleEdit();});"
+        . "var vccSaveBtn=dashboard&&dashboard.querySelector('.save-btn');"
+        . "if(vccSaveBtn)vccSaveBtn.addEventListener('click',function(){saveDashboardConfig();});"
+        . "document.querySelectorAll('.tile-move-toggle').forEach(function(button){button.addEventListener('click',function(){toggleTileReorderMode();});});"
         . "</script>";
 
     $html .= "</body></html>";
@@ -1584,7 +1592,7 @@ sub VolvoConnect_EmbedFragment {
     $content =~ s/document\.addEventListener\('keydown',function\(e\)\{/window.__vccKey&&document.removeEventListener('keydown',window.__vccKey);document.addEventListener('keydown',window.__vccKey=function(e){/;
     my $reload = "function vccEmbedReload(){"
         . "var root=document.querySelector('.vcc-embed'),wrap=root&&root.querySelector('.wrap[data-device]');if(!wrap)return;"
-        . "var url=(wrap.getAttribute('data-fhem-path')||'/fhem')+'/VolvoConnect/'+encodeURIComponent(wrap.getAttribute('data-device'))+'?embed=1';"
+        . "var url=(wrap.getAttribute('data-fhem-path')||'/fhem')+'/VolvoConnect/'+encodeURIComponent(wrap.getAttribute('data-device'))+'?embed=1'+(wrap.getAttribute('data-editable')==='1'?'&edit=1':'');"
         . "fetch(url,{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.text();}).then(function(t){"
         . "var current=document.querySelector('.vcc-embed');if(!current)return;"
         . "current.replaceWith(document.createRange().createContextualFragment(t));}).catch(function(){});}";
@@ -1656,7 +1664,9 @@ sub VolvoConnect_Get($$@) {
     }
 
     if ($cmd eq "_showDashboard") {
-        return VolvoConnect_BuildDashboard({hash => $hash, editable => 1});
+        # Deliver the dashboard as a scoped fragment (like _showEntityConfig) so its
+        # CSS does not clash with the FHEMWEB stylesheet inside the dialog.
+        return VolvoConnect_BuildDashboard({hash => $hash, editable => 1, embed => 1});
     }
 
     if ($cmd eq "_showEntityConfig") {
@@ -2613,9 +2623,12 @@ sub VolvoConnect_Reschedule($$) {
         <li>Copy the generated VCC API key. It is sent as the
             <code>vcc-api-key</code> header with every vehicle API request.</li>
         <li>Copy the OAuth client ID and client secret from the application's credentials.</li>
-        <li>Configure the redirect URI. It must be identical character by character to
-            <code>redirect_uri</code> in FHEM, including scheme, host, port, path and
-            trailing slash.</li>
+        <li><strong>Configure the redirect URI to:</strong> <code style="color: #0066cc; font-weight: bold;">https://your-fhem-host/fhem/volvoconnect/</code>
+            <br>Replace <code>your-fhem-host</code> with your FHEM hostname or domain.
+            It must be identical character by character to <code>redirect_uri</code> in FHEM,
+            including scheme, host, port, path and trailing slash. This is the recommended new
+            redirect handler as of November 2026, which provides an interactive device selector
+            and automatic code submission.</li>
         <li>Enable or request the APIs and permissions required by the application. The
             selected <code>scope_*</code> attributes in FHEM must correspond to permissions
             available to the application.</li>
@@ -2628,7 +2641,28 @@ sub VolvoConnect_Reschedule($$) {
         The module uses OAuth2 Authorization Code with PKCE. Run <code>set Volvo1 reauth</code>
         to clear stored tokens; then click the login link next to the device status to open
         Volvo's authorization URL with the configured scopes. After the Volvo ID login, Volvo redirects the browser to
-        the configured URI, for example:
+        the configured redirect URI with an authorization code.
+    </p>
+    <p>
+        <b>Recommended: Automatic code submission using the built-in handler</b><br>
+        Configure your redirect URI to point to FHEM's OAuth callback handler:
+    </p>
+    <code>https://your-fhem-host/fhem/volvoconnect/</code>
+    <p>
+        After successful login, Volvo redirects the browser to this URL with the authorization code as a query parameter.
+        The page automatically detects all your VolvoConnect devices and displays their current authentication status.
+        Simply click the <strong>"Set authCode"</strong> button next to the desired device to automatically submit the code.
+        The code will be exchanged for access and refresh tokens within seconds.
+    </p>
+    <p>
+        <b>For non-HTTPS setups:</b> If you run FHEM over plain HTTP (no SSL/TLS),
+        Volvo will still redirect with <code>https://...</code>. Simply change the URL in your browser from
+        <code>https://</code> to <code>http://</code> before submitting the code, or modify your browser's
+        redirect handling as needed. The handler page works over both HTTP and HTTPS.
+    </p>
+    <p>
+        <b>Alternative: Manual code extraction (legacy method)</b><br>
+        If you cannot use the built-in handler, configure the redirect URI as:
     </p>
     <code>http://localhost/?code=AUTH_CODE_EXAMPLE&amp;state=fhemstate</code>
     <p>
@@ -2665,17 +2699,23 @@ sub VolvoConnect_Reschedule($$) {
     <ul>
         <code>define &lt;name&gt; VolvoConnect</code><br>
         After defining the device, set all required attributes to the values from the Developer
-        Portal and start the login from the link shown next to the status icon. Copy the
-        authorization code from the redirect URL and use
-        <code>set &lt;name&gt; authCode &lt;code&gt;</code>.
+        Portal and start the login from the link shown next to the status icon.
         Example:
         <pre>define Volvo1 VolvoConnect
     attr Volvo1 vin YV1EXAMPLEVIN
     attr Volvo1 client_id YOUR_CLIENT_ID
     attr Volvo1 client_secret YOUR_CLIENT_SECRET
     attr Volvo1 vcc_api_key YOUR_VCC_API_KEY
-    attr Volvo1 redirect_uri http://localhost
+    attr Volvo1 redirect_uri https://your-fhem-host/fhem/volvoconnect/
+    attr Volvo1 keycloakService 1
     set Volvo1 reauth</pre>
+        <b>Recommended redirect_uri:</b>
+        <ul>
+            <li><code>https://your-fhem-host/fhem/volvoconnect/</code> — Use FHEM's built-in OAuth handler
+                (recommended). Replace <code>your-fhem-host</code> with your FHEM hostname/domain.</li>
+            <li>Supported schemes: <code>https://</code> (strongly recommended) or <code>http://</code> for local testing.</li>
+            <li>Must end with a <strong>trailing slash</strong> and match exactly in the Developer Portal.</li>
+        </ul>
     </ul>
     <br>
     <a name="VolvoConnectset"></a>
@@ -2788,8 +2828,11 @@ sub VolvoConnect_Reschedule($$) {
         <li>Den erzeugten VCC API Key kopieren. Das Modul sendet ihn bei jeder API-Abfrage im
             Header <code>vcc-api-key</code>.</li>
         <li>OAuth Client ID und Client Secret aus den Zugangsdaten der Anwendung kopieren.</li>
-        <li>Die Redirect-URI konfigurieren. Sie muss einschließlich Schema, Host, Port, Pfad und
-            abschließendem Slash exakt dem FHEM-Attribut <code>redirect_uri</code> entsprechen.</li>
+        <li><strong>Redirect-URI eintragen:</strong> <code style="color: #0066cc; font-weight: bold;">https://your-fhem-host/fhem/volvoconnect/</code>
+            <br><code>your-fhem-host</code> durch den FHEM-Hostnamen oder die Domain ersetzen.
+            Sie muss einschließlich Schema, Host, Port, Pfad und abschließendem Slash exakt dem FHEM-Attribut 
+            <code>redirect_uri</code> entsprechen. Dies ist die empfohlene neue Redirect-URL seit November 2026, 
+            die einen interaktiven Geräte-Wähler und automatische Code-Übergabe bietet.</li>
         <li>Die benötigten APIs und Berechtigungen für die Anwendung aktivieren bzw. beantragen.
             Die in FHEM aktivierten <code>scope_*</code>-Attribute müssen zu den im Portal
             verfügbaren Berechtigungen passen.</li>
@@ -2803,7 +2846,29 @@ sub VolvoConnect_Reschedule($$) {
         Das Modul verwendet OAuth2 Authorization Code mit PKCE. Mit <code>set Volvo1 reauth</code>
         werden gespeicherte Tokens gelöscht. Anschließend den Login-Link neben dem Gerätestatus
         anklicken, um die Volvo-Anmeldung mit den konfigurierten Scopes zu öffnen. Nach der
-        Anmeldung leitet Volvo den Browser zur Redirect-URI zurück, zum Beispiel:
+        Anmeldung leitet Volvo den Browser zur Redirect-URI zurück.
+    </p>
+    <p>
+        <b>Empfohlen: Automatische Code-Übergabe mit dem integrierten Handler</b><br>
+        Redirect-URI im Developer Portal auf FHEM's OAuth-Callback-Handler einstellen:
+    </p>
+    <code>https://your-fhem-host/fhem/volvoconnect/</code>
+    <p>
+        Nach erfolgreichem Volvo-Login leitet Volvo den Browser auf diese URL mit dem
+        Autorisierungscode als URL-Parameter. Die Seite zeigt automatisch alle VolvoConnect-Geräte
+        mit ihrem aktuellen Auth-Status an. Einfach auf den <strong>"Set authCode"</strong>-Button
+        neben dem gewünschten Gerät klicken, um den Code automatisch zu übermitteln.
+        Der Code wird innerhalb weniger Sekunden gegen Access- und Refresh-Token ausgetauscht.
+    </p>
+    <p>
+        <b>Für FHEM ohne HTTPS:</b> Wenn FHEM nur über HTTP erreichbar ist, leitet Volvo trotzdem
+        mit <code>https://...</code> weiter. Einfach die URL in der Adressleiste von
+        <code>https://</code> zu <code>http://</code> ändern, bevor der Code eingegeben wird.
+        Die Handler-Seite funktioniert über beide Protokolle.
+    </p>
+    <p>
+        <b>Alternative: Manuelle Code-Extraktion (altes Verfahren)</b><br>
+        Falls der integrierte Handler nicht genutzt werden kann, Redirect-URI als:
     </p>
     <code>http://localhost/?code=AUTH_CODE_BEISPIEL&amp;state=fhemstate</code>
     <p>
@@ -2811,16 +2876,7 @@ sub VolvoConnect_Reschedule($$) {
         <code>&amp;</code> kopiert. <code>state</code> und die komplette URL werden nicht
         übernommen. Der Code wird anschließend in FHEM eingegeben:
     </p>
-    <pre>define Volvo1 VolvoConnect
-attr Volvo1 vin YV1EXAMPLEVIN
-attr Volvo1 client_id DEINE_CLIENT_ID
-attr Volvo1 client_secret DEIN_CLIENT_SECRET
-attr Volvo1 vcc_api_key DEIN_VCC_API_KEY
-attr Volvo1 redirect_uri http://localhost
-set Volvo1 reauth
-
-# Nach dem Volvo-Login, Beispiel:
-set Volvo1 authCode AUTH_CODE_BEISPIEL</pre>
+    <code>set Volvo1 authCode AUTH_CODE_BEISPIEL</code>
     <p>
         FHEM tauscht den kurzlebigen Autorisierungscode am Endpoint
         <code>https://volvoid.eu.volvocars.com/as/token.oauth2</code> gegen Access- und
@@ -2836,24 +2892,31 @@ set Volvo1 authCode AUTH_CODE_BEISPIEL</pre>
         HTTPS-Reverse-Proxy erreichbar gemacht werden. Eine normale HTTP-Adresse im LAN genügt
         nicht, wenn Volvo für öffentliche Redirect-URIs HTTPS voraussetzt.
     </p>
-    <p>
-        Dynamische Endpunkte verwenden <code>interval</code> (Standard 300 Sekunden), langsamere
-        Diagnose- und Reifendaten <code>interval_slow</code> (Standard 1800 Sekunden) und der
-        Standort <code>interval_location</code> (Standard 900 Sekunden). Fähigkeiten, Befehlsliste
-        und Fahrzeugdetails werden einmal je VIN geladen; erfolgreiche Abrufzeitpunkte bleiben
-        über Neustarts erhalten. <code>set &lt;name&gt; update</code> erzwingt den Abruf aller
-        aktivierten Endpunkte. Das eigenständige Dashboard aktualisiert sich mit <code>interval</code>;
-        während der Layout-Bearbeitung ist der Refresh pausiert. Fahrzeugbefehle werden nur gesendet,
-        wenn der zugehörige Befehls-Scope aktiviert ist.
-    </p>
     <br>
     <a name="VolvoConnectdefine"></a>
     <b>Define</b>
     <ul>
         <code>define &lt;name&gt; VolvoConnect</code><br>
         Nach dem Anlegen alle erforderlichen Attribute mit den Werten aus dem Developer Portal
-        setzen. Danach den Login-Link neben dem Status-Punkt öffnen, den Code aus der Rücksprung-
-        URL kopieren und mit <code>set &lt;name&gt; authCode &lt;code&gt;</code> übergeben.
+        setzen und den Login-Link neben dem Status-Punkt öffnen.
+        Beispiel:
+        <pre>define Volvo1 VolvoConnect
+    attr Volvo1 vin YV1EXAMPLEVIN
+    attr Volvo1 client_id DEINE_CLIENT_ID
+    attr Volvo1 client_secret DEIN_CLIENT_SECRET
+    attr Volvo1 vcc_api_key DEIN_VCC_API_KEY
+    attr Volvo1 redirect_uri https://your-fhem-host/fhem/volvoconnect/
+    attr Volvo1 keycloakService 1
+    set Volvo1 reauth</pre>
+        <b>Empfohlene redirect_uri:</b>
+        <ul>
+            <li><code>https://your-fhem-host/fhem/volvoconnect/</code> — Verwendet FHEMs integrierten
+                OAuth-Handler (empfohlen). <code>your-fhem-host</code> durch den FHEM-Hostnamen oder
+                die Domain ersetzen.</li>
+            <li>Unterstützte Protokolle: <code>https://</code> (empfohlen) oder <code>http://</code> für lokale Tests.</li>
+            <li>Muss mit einem <strong>Schrägstrich am Ende</strong> enden und muss im Developer Portal exakt
+                übereinstimmen.</li>
+        </ul>
     </ul>
     <br>
     <a name="VolvoConnectset"></a>
