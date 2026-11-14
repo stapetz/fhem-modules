@@ -9,6 +9,9 @@
 |- style="background-color:#FFFFFF"
 | Typ
 | Inoffizielles Community-Modul; externe Updatequelle.
+|- style="background-color:#FFFFFF"
+| Version
+| 1.1.2 (Stand 14.11.2026)
 |- style="background-color:#EFEFFF"
 ! colspan="2" | Details
 |- style="background-color:#FFFFFF"
@@ -32,7 +35,9 @@
 
 Das Modul ist ein '''Community-Projekt und kein von Volvo Cars herausgegebenes oder unterstütztes Produkt'''. Verfügbarkeit, Aktualität und Umfang hängen von Fahrzeugmodell, Modelljahr, Region, Volvo-Anwendung und genehmigten Berechtigungen ab.
 
-Dieser Artikel beschreibt den stabilen Modulstand '''1.1.0'''. Für aktuelle Freigaben und Änderungen beachte die [https://github.com/stapetz/fhem-modules/blob/main/CHANGED_volvo Änderungshistorie].
+Dieser Artikel beschreibt den stabilen Modulstand '''1.1.2'''. Für aktuelle Freigaben und Änderungen beachte die [https://github.com/stapetz/fhem-modules/blob/main/CHANGED_volvo Änderungshistorie].
+
+Für sehr übersichtliche, frei gestaltbare Dashboards steht in [[Fhem-cms|fhem-cms]] ein natives VolvoConnect-Widget bereit, das die Daten dieses Moduls automatisch übernimmt; siehe den Abschnitt [[#Natives Fahrzeugwidget in fhem-cms|Natives Fahrzeugwidget in fhem-cms]] und die [https://github.com/stapetz/fhem-cms/wiki/VolvoConnect-Widget bebilderte Anleitung im fhem-cms-GitHub-Wiki].
 
 __TOC__
 
