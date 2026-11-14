@@ -2,6 +2,19 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 4303b2f fix(dashboard): bind edit buttons via listeners
+  and neutralize FHEM theme form styles [VolvoConnect]
+  Follows the proven _showEntityConfig pattern:
+  replace inline onclick (toggleEdit/saveDashboardConfig/toggleTileReorderMode)
+  with addEventListener bindings; inline handlers broke inside the scoped embed
+  fragment because the IIFE keeps functions non-global (ReferenceError:
+    toggleEdit)
+  reset box-shadow/border-radius/text-shadow/background-image/font on input and
+  button so FHEMWEB theme rules (e.g. touchpad input shadows) cannot restyle
+    rows
+  saveDashboardConfig now posts to the real FHEMWEB path and sends the fwcsrf
+    token
+  embed auto-refresh keeps the editable state via data-editable and ?edit=1
 - bugfix: 2026-11-14 efcbe2d fix(dashboard): deliver _showDashboard as scoped
   fragment like _showEntityConfig [VolvoConnect]
   The FHEM dialog received the full standalone page (global body/h1/.tile CSS),
