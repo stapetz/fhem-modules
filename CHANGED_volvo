@@ -2,6 +2,12 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- bugfix: 2026-11-14 6c8029e fix(dashboard): remove restrictive media queries
+  for FHEM dialog display
+  Remove @media(max-width:760px) and @media(max-width:500px) breakpoints
+  Dashboard now uses full width in FHEM dialogs, not compressed layout
+  Optik matches standalone view with full-width grid and controls
+  Fixes bearbeiten button and display in FHEM modal context
 - bugfix: 2026-11-10 53d2c28 Fix VolvoConnect scope config persistence
   (cherry picked from commit 6abc4ca7c8c01960381fa69bc8bf1fa8847587e5)
 - bugfix: 2026-11-10 95760ee Fix VolvoConnect dashboard URL path encoding
