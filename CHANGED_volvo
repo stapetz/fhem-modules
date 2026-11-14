@@ -2,6 +2,14 @@
 # Generated from Git commits by scripts/generate_changed.py.
 # Keep this file ASCII-only and use lines no longer than 79 characters.
 
+- change: 2026-11-14 252fd56 Release VolvoConnect 1.1.1
+  Dashboard-Dialog (_showDashboard) als gekapseltes Fragment wie
+    _showEntityConfig: FHEMWEB-Theme kollidiert nicht mehr mit dem
+    Dashboard-Layout
+  Bearbeiten im Dialog repariert (ReferenceError toggleEdit): Buttons ohne
+    Inline-onclick, Speichern mit korrektem Pfad und CSRF-Token
+  Theme-Formularstile (Schatten/Radius) im Dashboard neutralisiert;
+    Embed-Refresh behaelt den Editiermodus (embed=1&edit=1)
 - bugfix: 2026-11-10 6abc4ca Fix VolvoConnect scope config persistence
 - bugfix: 2026-11-10 665cde5 Fix VolvoConnect dashboard URL path encoding
 - bugfix: 2026-11-10 04f2357 Fix empty Volvo command request bodies
